@@ -1,0 +1,5 @@
+{
+  "name": "Truth Seeker AI",
+  "description": "Advanced multimodal behavioral analysis for uncovering truth using facial micro-expressions and voice stress detection.",
+  "requestFramePermissions": ["camera", "microphone"]
+}
