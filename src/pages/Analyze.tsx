@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Mic, Loader2, Play, Square, AlertCircle, CheckCircle2, Info, Brain } from "lucide-react";
+import { Camera, Mic, Loader2, Play, Square, AlertCircle, CheckCircle2, Info, Brain, Shield } from "lucide-react";
 import { useAnalysis } from "../context/AnalysisContext";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -153,160 +153,172 @@ export default function Analyze() {
   }, [stream]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-6 md:p-12 font-sans">
-      <div className="max-w-5xl mx-auto">
-        <header className="mb-12 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight mb-2">Behavioral Analysis</h1>
-            <p className="text-zinc-400">Enable your camera and microphone, then record your response for analysis.</p>
+    <div className="min-h-screen bg-[#020617] text-white font-sans flex flex-col">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/40 backdrop-blur-xl border-b border-white/5 p-6 md:px-12">
+        <div className="max-w-5xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <Shield className="w-5 h-5 text-black" />
+            </div>
+            <div className="flex flex-col -space-y-1">
+              <div className="text-base font-bold tracking-tight">
+                <span className="text-white">Veri</span>
+                <span className="text-emerald-400">Truth</span>
+              </div>
+              <span className="text-[7px] font-bold uppercase tracking-[0.2em] text-zinc-500">AI Deception Analysis</span>
+            </div>
           </div>
           <button 
             onClick={() => navigate("/")}
-            className="text-zinc-500 hover:text-white transition-colors"
+            className="text-zinc-500 hover:text-white transition-colors text-xs font-medium"
           >
-            Cancel
+            Cancel Session
           </button>
-        </header>
+        </div>
+      </header>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Recording Area */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="relative aspect-video bg-zinc-900 rounded-3xl border border-zinc-800 overflow-hidden shadow-2xl">
-              <video 
-                ref={videoRef} 
-                autoPlay 
-                muted 
-                playsInline 
-                className="w-full h-full object-cover"
-              />
-              
-              <AnimatePresence>
-                {!stream && (
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/90 backdrop-blur-sm z-20"
-                  >
-                    <Camera className="w-16 h-16 text-zinc-700 mb-6" />
-                    <button 
-                      onClick={startCamera}
-                      className="px-8 py-4 bg-white text-black rounded-full font-bold hover:bg-zinc-200 transition-all flex items-center gap-2"
+      <main className="flex-grow pt-32 pb-12 px-6 md:px-12 overflow-y-auto relative z-10">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Main Recording Area */}
+            <div className="lg:col-span-2 space-y-6">
+              <div className="relative aspect-video bg-slate-900/50 rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+                <video 
+                  ref={videoRef} 
+                  autoPlay 
+                  muted 
+                  playsInline 
+                  className="w-full h-full object-cover"
+                />
+                
+                <AnimatePresence>
+                  {!stream && (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-sm z-20"
                     >
-                      Enable Camera & Mic
-                    </button>
-                    {permissionError && (
-                      <p className="mt-4 text-red-400 text-sm flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4" />
-                        {permissionError}
-                      </p>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                      <Camera className="w-12 h-12 text-zinc-700 mb-6" />
+                      <button 
+                        onClick={startCamera}
+                        className="px-6 py-3 bg-white text-black rounded-full font-bold hover:bg-zinc-200 transition-all flex items-center gap-2 text-sm"
+                      >
+                        Enable Camera & Mic
+                      </button>
+                      {permissionError && (
+                        <p className="mt-4 text-red-400 text-xs flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4" />
+                          {permissionError}
+                        </p>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-              {isRecording && (
-                <div className="absolute top-6 left-6 flex items-center gap-3 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
-                  <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                  <span className="font-mono font-bold tracking-widest">
-                    {Math.floor(recordingTime / 60).toString().padStart(2, '0')}:
-                    {(recordingTime % 60).toString().padStart(2, '0')}
-                  </span>
-                </div>
-              )}
-
-              {isAnalyzing && (
-                <div className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center z-30">
-                  <div className="relative w-24 h-24 mb-8">
-                    <div className="absolute inset-0 border-4 border-emerald-500/20 rounded-full" />
-                    <div className="absolute inset-0 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Brain className="w-10 h-10 text-emerald-500" />
-                    </div>
+                {isRecording && (
+                  <div className="absolute top-6 left-6 flex items-center gap-3 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                    <span className="font-mono font-bold tracking-widest text-xs">
+                      {Math.floor(recordingTime / 60).toString().padStart(2, '0')}:
+                      {(recordingTime % 60).toString().padStart(2, '0')}
+                    </span>
                   </div>
-                  <h3 className="text-2xl font-bold mb-2">Analyzing Behavioral Patterns...</h3>
-                  <p className="text-zinc-400 animate-pulse">Processing facial and voice data fusion</p>
-                </div>
-              )}
+                )}
+
+                {isAnalyzing && (
+                  <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center z-30">
+                    <div className="relative w-20 h-20 mb-8">
+                      <div className="absolute inset-0 border-4 border-emerald-500/20 rounded-full" />
+                      <div className="absolute inset-0 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Brain className="w-8 h-8 text-emerald-500" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">Analyzing Patterns...</h3>
+                    <p className="text-xs text-zinc-400 animate-pulse">Processing facial and voice data fusion</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-center gap-4">
+                {!isRecording ? (
+                  <button 
+                    disabled={!stream || isAnalyzing}
+                    onClick={startRecording}
+                    className="px-10 py-4 bg-emerald-500 text-black rounded-full font-bold text-base flex items-center gap-3 hover:bg-emerald-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
+                  >
+                    <Play className="w-5 h-5 fill-current" />
+                    Start Recording
+                  </button>
+                ) : (
+                  <button 
+                    onClick={stopRecording}
+                    className="px-10 py-4 bg-white text-black rounded-full font-bold text-base flex items-center gap-3 hover:bg-zinc-200 transition-all shadow-lg shadow-white/20"
+                  >
+                    <Square className="w-5 h-5 fill-current" />
+                    Stop & Analyze
+                  </button>
+                )}
+              </div>
             </div>
 
-            <div className="flex justify-center gap-4">
-              {!isRecording ? (
-                <button 
-                  disabled={!stream || isAnalyzing}
-                  onClick={startRecording}
-                  className="px-12 py-5 bg-emerald-500 text-black rounded-full font-bold text-lg flex items-center gap-3 hover:bg-emerald-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
-                >
-                  <Play className="w-6 h-6 fill-current" />
-                  Start Recording
-                </button>
-              ) : (
-                <button 
-                  onClick={stopRecording}
-                  className="px-12 py-5 bg-white text-black rounded-full font-bold text-lg flex items-center gap-3 hover:bg-zinc-200 transition-all shadow-lg shadow-white/20"
-                >
-                  <Square className="w-6 h-6 fill-current" />
-                  Stop & Analyze
-                </button>
-              )}
-            </div>
-          </div>
+            {/* Sidebar Info */}
+            <div className="space-y-6">
+              <div className="p-6 bg-slate-900/40 border border-white/5 rounded-3xl">
+                <h3 className="text-base font-bold mb-6 flex items-center gap-2">
+                  <Info className="w-4 h-4 text-emerald-500" />
+                  Tips for Best Results
+                </h3>
+                <ul className="space-y-4 text-xs text-zinc-400">
+                  <li className="flex gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                    Ensure good lighting on your face
+                  </li>
+                  <li className="flex gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                    Speak clearly at a normal pace
+                  </li>
+                  <li className="flex gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                    Keep your face centered in frame
+                  </li>
+                  <li className="flex gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                    Minimize background noise
+                  </li>
+                  <li className="flex gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                    Record for at least 10 seconds
+                  </li>
+                </ul>
+              </div>
 
-          {/* Sidebar Info */}
-          <div className="space-y-6">
-            <div className="p-8 bg-zinc-900/50 border border-zinc-800 rounded-3xl">
-              <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                <Info className="w-5 h-5 text-emerald-500" />
-                Tips for Best Results
-              </h3>
-              <ul className="space-y-4 text-sm text-zinc-400">
-                <li className="flex gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                  Ensure good lighting on your face
-                </li>
-                <li className="flex gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                  Speak clearly at a normal pace
-                </li>
-                <li className="flex gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                  Keep your face centered in frame
-                </li>
-                <li className="flex gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                  Minimize background noise
-                </li>
-                <li className="flex gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                  Record for at least 10 seconds
-                </li>
-              </ul>
-            </div>
-
-            <div className="p-8 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl">
-              <h3 className="text-lg font-bold mb-4 text-emerald-500">Analysis Status</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-zinc-400">Camera</span>
-                  <span className={stream ? "text-emerald-500" : "text-zinc-600"}>
-                    {stream ? "Connected" : "Not Ready"}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-zinc-400">Microphone</span>
-                  <span className={stream ? "text-emerald-500" : "text-zinc-600"}>
-                    {stream ? "Connected" : "Not Ready"}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-zinc-400">Neural Network</span>
-                  <span className="text-emerald-500">Active</span>
+              <div className="p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl">
+                <h3 className="text-base font-bold mb-4 text-emerald-500">Analysis Status</h3>
+                <div className="space-y-4">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-zinc-400">Camera</span>
+                    <span className={stream ? "text-emerald-500" : "text-zinc-600"}>
+                      {stream ? "Connected" : "Not Ready"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-zinc-400">Microphone</span>
+                    <span className={stream ? "text-emerald-500" : "text-zinc-600"}>
+                      {stream ? "Connected" : "Not Ready"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-zinc-400">Neural Network</span>
+                    <span className="text-emerald-500">Active</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
