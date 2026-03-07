@@ -1,4 +1,5 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useState, useRef } from "react";
 import { useAnalysis } from "../context/AnalysisContext";
 import { 
   Shield, 
@@ -10,8 +11,15 @@ import {
   TrendingUp, 
   Activity,
   Zap,
-  Brain
+  Brain,
+  Home,
+  History,
+  X,
+  FileText,
+  Printer
 } from "lucide-react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import { 
   LineChart, 
   Line, 
@@ -28,11 +36,54 @@ import {
   PolarRadiusAxis,
   Radar
 } from "recharts";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
+import { Background } from "../components/Background";
 
 export default function Results() {
   const navigate = useNavigate();
   const { analysisResults } = useAnalysis();
+  const [showPreview, setShowPreview] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
+
+  const handleExport = () => {
+    setShowPreview(true);
+  };
+
+  const downloadPDF = async () => {
+    if (!reportRef.current) return;
+    
+    const canvas = await html2canvas(reportRef.current, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff"
+    });
+    
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`veritruth_report_${new Date().getTime()}.pdf`);
+    setShowPreview(false);
+  };
+
+  const handleShare = async () => {
+    if (!analysisResults) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'VeriTruth Analysis Results',
+          text: `VeriTruth Analysis: ${analysisResults.verdict.toUpperCase()} detected with ${analysisResults.overallConfidence}% confidence.`,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    } else {
+      alert("Sharing is not supported in this browser. You can copy the URL to share.");
+    }
+  };
 
   if (!analysisResults) {
     return (
@@ -40,12 +91,20 @@ export default function Results() {
         <AlertTriangle className="w-16 h-16 text-zinc-700 mb-6" />
         <h2 className="text-2xl font-bold mb-4">No Analysis Data</h2>
         <p className="text-zinc-400 mb-8">Please record and analyze a video first to see results.</p>
-        <button 
-          onClick={() => navigate("/analyze")}
-          className="px-8 py-4 bg-emerald-500 text-black rounded-full font-bold hover:bg-emerald-400 transition-all"
-        >
-          Go to Analysis
-        </button>
+        <div className="flex gap-4">
+          <button 
+            onClick={() => navigate("/")}
+            className="px-8 py-4 bg-white/5 border border-white/10 text-white rounded-full font-bold hover:bg-white/10 transition-all flex items-center gap-2"
+          >
+            <Home className="w-5 h-5" /> Home
+          </button>
+          <button 
+            onClick={() => navigate("/analyze")}
+            className="px-8 py-4 bg-emerald-500 text-black rounded-full font-bold hover:bg-emerald-400 transition-all flex items-center gap-2"
+          >
+            <Zap className="w-5 h-5 fill-current" /> Go to Analysis
+          </button>
+        </div>
       </div>
     );
   }
@@ -53,7 +112,8 @@ export default function Results() {
   const isTruth = analysisResults.verdict === "truth";
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white font-sans selection:bg-emerald-500/30 flex flex-col">
+    <div className="min-h-screen bg-[#020617] text-white font-sans selection:bg-emerald-500/30 flex flex-col relative">
+      <Background />
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/40 backdrop-blur-xl border-b border-white/5 p-6 md:px-12">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -78,10 +138,28 @@ export default function Results() {
             </div>
           </div>
           <div className="flex gap-3">
-            <button className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold flex items-center gap-2 hover:bg-white/10 transition-all">
+            <Link 
+              to="/"
+              className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold flex items-center gap-2 hover:bg-white/10 transition-all"
+            >
+              <Home className="w-3 h-3" /> Home
+            </Link>
+            <Link 
+              to="/history"
+              className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold flex items-center gap-2 hover:bg-white/10 transition-all"
+            >
+              <History className="w-3 h-3" /> History
+            </Link>
+            <button 
+              onClick={handleExport}
+              className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold flex items-center gap-2 hover:bg-white/10 transition-all"
+            >
               <Download className="w-3 h-3" /> Export
             </button>
-            <button className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold flex items-center gap-2 hover:bg-white/10 transition-all">
+            <button 
+              onClick={handleShare}
+              className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold flex items-center gap-2 hover:bg-white/10 transition-all"
+            >
               <Share2 className="w-3 h-3" /> Share
             </button>
           </div>
@@ -278,6 +356,150 @@ export default function Results() {
           </div>
         </div>
       </main>
+
+      {/* PDF Preview Modal */}
+      <AnimatePresence>
+        {showPreview && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPreview(false)}
+              className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+            />
+            
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-4xl max-h-[90vh] bg-zinc-900 border border-white/10 rounded-3xl overflow-hidden flex flex-col shadow-2xl"
+            >
+              {/* Modal Header */}
+              <div className="p-6 border-b border-white/10 flex items-center justify-between bg-zinc-900/50 backdrop-blur-md">
+                <div className="flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-emerald-500" />
+                  <h3 className="text-lg font-bold">Report Preview</h3>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={downloadPDF}
+                    className="px-6 py-2.5 bg-emerald-500 text-black rounded-full text-xs font-bold flex items-center gap-2 hover:bg-emerald-400 transition-all"
+                  >
+                    <Download className="w-3.5 h-3.5" /> Download PDF
+                  </button>
+                  <button 
+                    onClick={() => setShowPreview(false)}
+                    className="p-2 hover:bg-white/5 rounded-full transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* PDF Content Area (White Background for PDF) */}
+              <div className="flex-grow overflow-y-auto p-8 bg-zinc-800/50">
+                <div 
+                  ref={reportRef}
+                  className="w-full max-w-[210mm] mx-auto p-[20mm] shadow-xl min-h-[297mm] font-serif"
+                  style={{ backgroundColor: "#ffffff", color: "#000000" }}
+                >
+                  <div className="flex justify-between items-center pb-8 mb-12" style={{ borderBottom: "2px solid #18181b" }}>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Shield className="w-8 h-8" style={{ color: "#059669" }} />
+                        <h1 className="text-3xl font-black tracking-tighter leading-none">VERITRUTH</h1>
+                      </div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: "#71717a" }}>AI Behavioral Analysis Report</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-12 mb-12">
+                    <div className="p-6 rounded-xl" style={{ backgroundColor: "#fafafa", border: "1px solid #e4e4e7" }}>
+                      <h2 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "#71717a" }}>Subject Assessment</h2>
+                      <div className="flex items-center gap-4">
+                        <div className="text-4xl font-black uppercase tracking-tighter" style={{ color: analysisResults?.verdict === 'truth' ? '#059669' : '#dc2626' }}>
+                          {analysisResults?.verdict}
+                        </div>
+                        <div className="h-10 w-px" style={{ backgroundColor: "#e4e4e7" }} />
+                        <div>
+                          <p className="text-2xl font-black">{analysisResults?.overallConfidence}%</p>
+                          <p className="text-[10px] font-bold uppercase" style={{ color: "#71717a" }}>Confidence Score</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-6 rounded-xl" style={{ backgroundColor: "#fafafa", border: "1px solid #e4e4e7" }}>
+                      <h2 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "#71717a" }}>Session Metadata</h2>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span style={{ color: "#71717a" }}>Duration:</span>
+                          <span className="font-bold">{analysisResults?.recordingDuration} Seconds</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span style={{ color: "#71717a" }}>Modality:</span>
+                          <span className="font-bold">Multimodal Fusion</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span style={{ color: "#71717a" }}>Engine:</span>
+                          <span className="font-bold">VeriTruth Core v4.2</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mb-12">
+                    <h2 className="text-sm font-bold uppercase tracking-widest pb-2 mb-6" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>AI Behavioral Summary</h2>
+                    <p className="text-lg leading-relaxed italic" style={{ color: "#27272a" }}>
+                      "{analysisResults?.aiAnalysis}"
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-12 mb-12">
+                    <div>
+                      <h2 className="text-sm font-bold uppercase tracking-widest pb-2 mb-6" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>Facial Indicators</h2>
+                      <div className="space-y-4">
+                        {analysisResults?.facialFeatures.map((f, i) => (
+                          <div key={i}>
+                            <div className="flex justify-between text-xs font-bold mb-1">
+                              <span>{f.feature}</span>
+                              <span>{f.value}%</span>
+                            </div>
+                            <div className="h-1 rounded-full overflow-hidden" style={{ backgroundColor: "#f4f4f5" }}>
+                              <div className="h-full" style={{ width: `${f.value}%`, backgroundColor: "#059669" }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h2 className="text-sm font-bold uppercase tracking-widest pb-2 mb-6" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>Vocal Indicators</h2>
+                      <div className="space-y-4">
+                        {analysisResults?.voiceFeatures.map((f, i) => (
+                          <div key={i}>
+                            <div className="flex justify-between text-xs font-bold mb-1">
+                              <span>{f.feature}</span>
+                              <span>{f.value}%</span>
+                            </div>
+                            <div className="h-1 rounded-full overflow-hidden" style={{ backgroundColor: "#f4f4f5" }}>
+                              <div className="h-full" style={{ width: `${f.value}%`, backgroundColor: "#2563eb" }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-auto pt-12 text-center" style={{ borderTop: "1px solid #e4e4e7" }}>
+                    <p className="text-[10px] font-bold tracking-[0.3em] uppercase" style={{ color: "#a1a1aa" }}>
+                      Confidential Analysis Report • Generated by VeriTruth AI
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

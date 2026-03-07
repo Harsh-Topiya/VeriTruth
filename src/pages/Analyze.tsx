@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Camera, Mic, Loader2, Play, Square, AlertCircle, CheckCircle2, Info, Brain, Shield } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Camera, Mic, Loader2, Play, Square, AlertCircle, CheckCircle2, Info, Brain, Shield, History } from "lucide-react";
 import { useAnalysis } from "../context/AnalysisContext";
 import { motion, AnimatePresence } from "motion/react";
+import { analyzeVideo } from "../services/geminiService";
+import { Background } from "../components/Background";
 
 export default function Analyze() {
   const navigate = useNavigate();
@@ -10,6 +12,7 @@ export default function Analyze() {
   
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const recordingTimeRef = useRef(0);
   const [permissionError, setPermissionError] = useState<string | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -18,20 +21,56 @@ export default function Analyze() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Sync ref with state for use in callbacks
+  useEffect(() => {
+    recordingTimeRef.current = recordingTime;
+  }, [recordingTime]);
+
   const startCamera = async () => {
+    setPermissionError(null);
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setPermissionError("Your browser does not support camera/microphone access or you are not in a secure (HTTPS) context.");
+      return;
+    }
+
+    // Try with ideal constraints first
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "user", width: 1280, height: 720 }, 
+        video: { 
+          facingMode: "user", 
+          width: { ideal: 1280 }, 
+          height: { ideal: 720 } 
+        }, 
         audio: true 
       });
       setStream(mediaStream);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
-      setPermissionError(null);
-    } catch (err) {
+      return;
+    } catch (err: any) {
+      console.warn("Failed with ideal constraints, trying basic fallback...", err);
+    }
+
+    // Fallback to basic constraints
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
+        video: true, 
+        audio: true 
+      });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+    } catch (err: any) {
       console.error("Error accessing media devices:", err);
-      setPermissionError("Camera and microphone access denied. Please enable them to continue.");
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setPermissionError("Permission denied. Please click the camera icon in your browser's address bar to 'Always allow' access, then refresh the page.");
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setPermissionError("No camera or microphone found. Please connect a device and try again.");
+      } else {
+        setPermissionError(`Could not access camera/mic: ${err.message || "Unknown error"}`);
+      }
     }
   };
 
@@ -87,22 +126,20 @@ export default function Analyze() {
       reader.readAsDataURL(blob);
       const videoBase64 = await base64Promise;
 
-      const response = await fetch("/api/analyze", {
+      // Call Gemini API on the frontend
+      const results = await analyzeVideo(videoBase64, recordingTimeRef.current);
+      
+      // Ensure recordingDuration is included in the results
+      results.recordingDuration = recordingTimeRef.current;
+
+      // Save results to backend
+      await fetch("/api/sessions/save", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          videoBase64,
-          recordingDuration: recordingTime
-        }),
+        body: JSON.stringify(results),
       });
-
-      if (!response.ok) {
-        throw new Error("Analysis failed");
-      }
-
-      const results = await response.json();
       
       setAnalysisResults(results);
       setIsAnalyzing(false);
@@ -135,7 +172,7 @@ export default function Analyze() {
           voice: 85 + Math.random() * 10,
           combined: 82 + Math.random() * 10
         })),
-        recordingDuration: recordingTime,
+        recordingDuration: recordingTimeRef.current,
         aiAnalysis: "Analysis complete. Multimodal fusion indicates high probability of truthful behavior based on micro-expression clusters and vocal frequency fluctuations."
       };
       setAnalysisResults(mockResults);
@@ -154,6 +191,7 @@ export default function Analyze() {
 
   return (
     <div className="min-h-screen bg-[#020617] text-white font-sans flex flex-col">
+      <Background />
       <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/40 backdrop-blur-xl border-b border-white/5 p-6 md:px-12">
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -168,12 +206,20 @@ export default function Analyze() {
               <span className="text-[7px] font-bold uppercase tracking-[0.2em] text-zinc-500">AI Deception Analysis</span>
             </div>
           </div>
-          <button 
-            onClick={() => navigate("/")}
-            className="text-zinc-500 hover:text-white transition-colors text-xs font-medium"
-          >
-            Cancel Session
-          </button>
+          <div className="flex items-center gap-6">
+            <Link 
+              to="/history"
+              className="text-zinc-500 hover:text-white transition-colors text-xs font-medium flex items-center gap-2"
+            >
+              <History className="w-3.5 h-3.5" /> History
+            </Link>
+            <button 
+              onClick={() => navigate("/")}
+              className="text-zinc-500 hover:text-white transition-colors text-xs font-medium"
+            >
+              Cancel Session
+            </button>
+          </div>
         </div>
       </header>
 

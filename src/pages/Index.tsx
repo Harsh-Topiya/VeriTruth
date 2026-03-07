@@ -1,17 +1,12 @@
 import { Link } from "react-router-dom";
 import { Shield, Brain, Mic, Eye, ArrowRight, CheckCircle2, Zap } from "lucide-react";
 import { motion } from "motion/react";
+import { Background } from "../components/Background";
 
 export default function Index() {
   return (
     <div className="min-h-screen bg-[#020617] text-white font-sans selection:bg-emerald-500/30 overflow-x-hidden">
-      {/* Vibrant Background Elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-emerald-600/20 blur-[160px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-blue-600/20 blur-[160px] rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] h-[40%] bg-purple-600/10 blur-[140px] rounded-full" />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
-      </div>
+      <Background />
 
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-slate-950/40 backdrop-blur-xl border-b border-white/5">
@@ -31,6 +26,7 @@ export default function Index() {
           <div className="hidden md:flex items-center gap-8 text-xs font-medium text-zinc-400">
             <a href="#technology" className="hover:text-white transition-colors">Technology</a>
             <a href="#how-it-works" className="hover:text-white transition-colors">How it Works</a>
+            <Link to="/history" className="hover:text-white transition-colors">History</Link>
             <Link to="/results" className="hover:text-white transition-colors">Results</Link>
           </div>
           <Link 
@@ -69,10 +65,10 @@ export default function Index() {
                   <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link 
-                  to="/results" 
+                  to="/history" 
                   className="px-10 py-5 bg-white/5 border border-white/10 backdrop-blur-md text-white rounded-full text-lg font-bold hover:bg-white/10 transition-all active:scale-95"
                 >
-                  View Results
+                  View History
                 </Link>
               </div>
             </motion.div>
