@@ -15,6 +15,7 @@ FACIAL MICRO-EXPRESSION INDICATORS TO ANALYZE:
 4. Lip Tension (0-100): Compressed or tense lips may indicate withholding information
 5. Brow Movement (0-100): Asymmetrical or excessive brow movement may suggest deception
 6. Facial Symmetry (0-100): Genuine expressions are typically more symmetrical
+7. Facial Confidence (0-100): Overall appearance of confidence and relaxation in facial muscles
 
 VOICE STRESS INDICATORS TO ANALYZE:
 1. Pitch Variance (0-100): Unusual pitch changes may indicate stress
@@ -23,6 +24,7 @@ VOICE STRESS INDICATORS TO ANALYZE:
 4. Voice Tremor (0-100): Micro-tremors in voice indicating nervousness
 5. MFCC Score (0-100): Mel-frequency cepstral coefficients analysis
 6. Jitter (0-100): Voice frequency perturbation analysis
+7. Speech Clarity (0-100): How clear and articulate the speech is, vs mumbling or stuttering
 
 VERDICT DETERMINATION:
 - Fusion Score = (Facial Score × 0.55) + (Voice Score × 0.45)
@@ -37,13 +39,17 @@ You must respond with ONLY a valid JSON object (no markdown, no explanation) in 
   "facialScore": number (0-100),
   "voiceScore": number (0-100),
   "fusionScore": number (0-100),
+  "facialConfidence": number (0-100),
+  "speechClarity": number (0-100),
+  "eyeContact": number (0-100),
   "facialFeatures": [
     {"feature": "Blink Rate", "value": number, "fullMark": 100},
     {"feature": "Micro-expressions", "value": number, "fullMark": 100},
     {"feature": "Eye Contact", "value": number, "fullMark": 100},
     {"feature": "Lip Tension", "value": number, "fullMark": 100},
     {"feature": "Brow Movement", "value": number, "fullMark": 100},
-    {"feature": "Facial Symmetry", "value": number, "fullMark": 100}
+    {"feature": "Facial Symmetry", "value": number, "fullMark": 100},
+    {"feature": "Facial Confidence", "value": number, "fullMark": 100}
   ],
   "voiceFeatures": [
     {"feature": "Pitch Variance", "value": number},
@@ -51,7 +57,8 @@ You must respond with ONLY a valid JSON object (no markdown, no explanation) in 
     {"feature": "Pause Patterns", "value": number},
     {"feature": "Voice Tremor", "value": number},
     {"feature": "MFCC Score", "value": number},
-    {"feature": "Jitter", "value": number}
+    {"feature": "Jitter", "value": number},
+    {"feature": "Speech Clarity", "value": number}
   ],
   "timelineData": [array of {time: "0-5s", facial: number, voice: number, combined: number}],
   "aiAnalysis": "Brief 2-3 sentence analysis explaining the key indicators that led to this verdict"

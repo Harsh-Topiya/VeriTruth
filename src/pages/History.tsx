@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { motion } from "motion/react";
-import { History as HistoryIcon, Trash2, ChevronRight, Calendar, Clock, Brain, Shield, AlertCircle, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { History as HistoryIcon, Trash2, ChevronRight, Calendar, Clock, Brain, Shield, AlertCircle, CheckCircle2, Zap, Activity, Mic, Eye } from "lucide-react";
 import { useAnalysis } from "../context/AnalysisContext";
 import { Background } from "../components/Background";
 
@@ -13,6 +14,10 @@ interface Session {
   facialScore: number;
   voiceScore: number;
   fusionScore: number;
+  facialConfidence: number;
+  speechClarity: number;
+  eyeContact: number;
+  recordingDuration: number;
   aiAnalysis: string;
   fullResults: string;
 }
@@ -21,6 +26,8 @@ export default function History() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { setAnalysisResults } = useAnalysis();
+  const [expandedSessionId, setExpandedSessionId] = useState<number | null>(null);
+  const [deletingSessionId, setDeletingSessionId] = useState<number | null>(null);
 
   const { data: sessions, isLoading, error } = useQuery<Session[]>({
     queryKey: ["sessions"],
@@ -43,6 +50,14 @@ export default function History() {
   });
 
   const handleViewSession = (session: Session) => {
+    if (expandedSessionId === session.id) {
+      setExpandedSessionId(null);
+    } else {
+      setExpandedSessionId(session.id);
+    }
+  };
+
+  const handleGoToResults = (session: Session) => {
     const fullResults = JSON.parse(session.fullResults);
     setAnalysisResults(fullResults);
     navigate("/results");
@@ -109,6 +124,7 @@ export default function History() {
             {sessions?.map((session, index) => {
               const { date, time } = formatDate(session.timestamp);
               const isTruth = session.verdict === "truth";
+              const isExpanded = expandedSessionId === session.id;
               
               return (
                 <motion.div
@@ -116,66 +132,213 @@ export default function History() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="group relative p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-emerald-500/30 transition-all cursor-pointer"
-                  onClick={() => handleViewSession(session)}
+                  className={`group relative rounded-3xl bg-white/5 border transition-all overflow-hidden ${
+                    isExpanded ? "border-emerald-500/50 ring-1 ring-emerald-500/20" : "border-white/10 hover:border-emerald-500/30"
+                  }`}
                 >
-                  <div className="flex items-center justify-between gap-6">
-                    <div className="flex items-center gap-6">
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border ${
-                        isTruth 
-                          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
-                          : "bg-red-500/10 border-red-500/20 text-red-400"
-                      }`}>
-                        {isTruth ? <CheckCircle2 className="w-7 h-7" /> : <Shield className="w-7 h-7" />}
-                      </div>
-                      
-                      <div>
-                        <div className="flex items-center gap-3 mb-1">
-                          <span className={`text-sm font-bold uppercase tracking-wider ${
-                            isTruth ? "text-emerald-400" : "text-red-400"
-                          }`}>
-                            {session.verdict} detected
-                          </span>
-                          <span className="w-1 h-1 rounded-full bg-zinc-700" />
-                          <span className="text-zinc-400 text-sm font-medium">
-                            {session.overallConfidence}% Confidence
-                          </span>
+                  <div 
+                    className="p-6 cursor-pointer"
+                    onClick={() => handleViewSession(session)}
+                  >
+                    <div className="flex items-center justify-between gap-6">
+                      <div className="flex items-center gap-6">
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border ${
+                          isTruth 
+                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
+                            : "bg-red-500/10 border-red-500/20 text-red-400"
+                        }`}>
+                          {isTruth ? <CheckCircle2 className="w-7 h-7" /> : <Shield className="w-7 h-7" />}
                         </div>
-                        <div className="flex items-center gap-4 text-zinc-500 text-xs">
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5" />
-                            {date}
+                        
+                        <div>
+                          <div className="flex items-center gap-3 mb-1">
+                            <span className={`text-sm font-bold uppercase tracking-wider ${
+                              isTruth ? "text-emerald-400" : "text-red-400"
+                            }`}>
+                              {session.verdict} detected
+                            </span>
+                            <span className="w-1 h-1 rounded-full bg-zinc-700" />
+                            <span className="text-zinc-400 text-sm font-medium">
+                              {session.overallConfidence}% Confidence
+                            </span>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <Clock className="w-3.5 h-3.5" />
-                            {time}
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-1 h-1 rounded-full bg-zinc-700" />
-                            <span>{JSON.parse(session.fullResults).recordingDuration || 0}s</span>
+                          <div className="flex items-center gap-4 text-zinc-500 text-xs">
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5" />
+                              {date}
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Clock className="w-3.5 h-3.5" />
+                              {time}
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-1 h-1 rounded-full bg-zinc-700" />
+                              <span>{session.recordingDuration || 0}s</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (confirm("Are you sure you want to delete this session?")) {
-                            deleteMutation.mutate(session.id);
-                          }
-                        }}
-                        className="p-3 rounded-xl bg-white/5 text-zinc-500 hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100"
-                        title="Delete session"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                      <div className="p-3 rounded-xl bg-white/5 text-zinc-400 group-hover:bg-emerald-500 group-hover:text-black transition-all">
-                        <ChevronRight className="w-5 h-5" />
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <AnimatePresence mode="wait">
+                            {deletingSessionId === session.id ? (
+                              <motion.div
+                                key="confirm"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                className="flex items-center gap-2"
+                              >
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteMutation.mutate(session.id);
+                                    setDeletingSessionId(null);
+                                  }}
+                                  className="px-3 py-1.5 rounded-lg bg-red-500 text-white text-[10px] font-bold uppercase tracking-wider hover:bg-red-400 transition-colors"
+                                >
+                                  Confirm
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDeletingSessionId(null);
+                                  }}
+                                  className="px-3 py-1.5 rounded-lg bg-white/10 text-zinc-400 text-[10px] font-bold uppercase tracking-wider hover:bg-white/20 transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                              </motion.div>
+                            ) : (
+                              <motion.button
+                                key="delete"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeletingSessionId(session.id);
+                                }}
+                                className="p-3 rounded-xl bg-white/5 text-zinc-500 hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100"
+                                title="Delete session"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </motion.button>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                        <div className={`p-3 rounded-xl transition-all ${
+                          isExpanded ? "bg-emerald-500 text-black rotate-90" : "bg-white/5 text-zinc-400 group-hover:bg-emerald-500 group-hover:text-black"
+                        }`}>
+                          <ChevronRight className="w-5 h-5" />
+                        </div>
                       </div>
                     </div>
                   </div>
+
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="border-t border-white/5 bg-white/[0.02]"
+                      >
+                        <div className="p-8 space-y-8">
+                          <div className="grid md:grid-cols-3 gap-6">
+                            <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                              <div className="flex items-center gap-2 mb-3 text-emerald-400">
+                                <Activity className="w-4 h-4" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Facial Score</span>
+                              </div>
+                              <div className="text-2xl font-black">{session.facialScore}%</div>
+                              <div className="mt-2 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                                <div className="h-full bg-emerald-500" style={{ width: `${session.facialScore}%` }} />
+                              </div>
+                            </div>
+                            
+                            <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                              <div className="flex items-center gap-2 mb-3 text-blue-400">
+                                <Mic className="w-4 h-4" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Voice Score</span>
+                              </div>
+                              <div className="text-2xl font-black">{session.voiceScore}%</div>
+                              <div className="mt-2 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                                <div className="h-full bg-blue-500" style={{ width: `${session.voiceScore}%` }} />
+                              </div>
+                            </div>
+
+                            <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                              <div className="flex items-center gap-2 mb-3 text-purple-400">
+                                <Zap className="w-4 h-4" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Fusion Score</span>
+                              </div>
+                              <div className="text-2xl font-black">{session.fusionScore}%</div>
+                              <div className="mt-2 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                                <div className="h-full bg-purple-500" style={{ width: `${session.fusionScore}%` }} />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid md:grid-cols-3 gap-6">
+                            <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                              <div className="flex items-center gap-2 mb-3 text-emerald-400">
+                                <Shield className="w-4 h-4" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Facial Confidence</span>
+                              </div>
+                              <div className="text-2xl font-black">{session.facialConfidence}%</div>
+                              <div className="mt-2 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                                <div className="h-full bg-emerald-500" style={{ width: `${session.facialConfidence}%` }} />
+                              </div>
+                            </div>
+                            
+                            <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                              <div className="flex items-center gap-2 mb-3 text-blue-400">
+                                <Activity className="w-4 h-4" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Speech Clarity</span>
+                              </div>
+                              <div className="text-2xl font-black">{session.speechClarity}%</div>
+                              <div className="mt-2 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                                <div className="h-full bg-blue-500" style={{ width: `${session.speechClarity}%` }} />
+                              </div>
+                            </div>
+
+                            <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                              <div className="flex items-center gap-2 mb-3 text-purple-400">
+                                <Eye className="w-4 h-4" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Eye Contact</span>
+                              </div>
+                              <div className="text-2xl font-black">{session.eyeContact}%</div>
+                              <div className="mt-2 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                                <div className="h-full bg-purple-500" style={{ width: `${session.eyeContact}%` }} />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="p-6 rounded-2xl bg-white/5 border border-white/5">
+                            <div className="flex items-center gap-2 mb-4 text-zinc-400">
+                              <Brain className="w-4 h-4" />
+                              <span className="text-[10px] font-bold uppercase tracking-widest">AI Analysis Summary</span>
+                            </div>
+                            <p className="text-zinc-300 text-sm leading-relaxed italic">
+                              "{session.aiAnalysis}"
+                            </p>
+                          </div>
+
+                          <div className="flex justify-end">
+                            <button
+                              onClick={() => handleGoToResults(session)}
+                              className="px-6 py-3 rounded-xl bg-white text-black font-bold text-xs hover:bg-zinc-200 transition-all flex items-center gap-2"
+                            >
+                              View Full Detailed Report <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               );
             })}

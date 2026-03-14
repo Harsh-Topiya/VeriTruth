@@ -324,7 +324,10 @@ export default function Results() {
                 {[
                   { label: "Facial Micro-expressions", score: analysisResults.facialScore, color: "bg-emerald-500" },
                   { label: "Vocal Stress Index", score: analysisResults.voiceScore, color: "bg-blue-500" },
-                  { label: "Cognitive Load Fusion", score: analysisResults.fusionScore, color: "bg-purple-500" }
+                  { label: "Cognitive Load Fusion", score: analysisResults.fusionScore, color: "bg-purple-500" },
+                  { label: "Facial Confidence", score: analysisResults.facialConfidence, color: "bg-emerald-400" },
+                  { label: "Speech Clarity", score: analysisResults.speechClarity, color: "bg-blue-400" },
+                  { label: "Eye Contact", score: analysisResults.eyeContact, color: "bg-purple-400" }
                 ].map((item, i) => (
                   <div key={i}>
                     <div className="flex justify-between text-[10px] font-bold mb-2 uppercase tracking-widest">
@@ -443,6 +446,24 @@ export default function Results() {
                           <span style={{ color: "#71717a" }}>Engine:</span>
                           <span className="font-bold">VeriTruth Core v4.2</span>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mb-12">
+                    <h2 className="text-sm font-bold uppercase tracking-widest pb-2 mb-6" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>Core Behavioral Metrics</h2>
+                    <div className="grid grid-cols-3 gap-6">
+                      <div className="p-4 rounded-xl text-center" style={{ backgroundColor: "#f9fafb", border: "1px solid #f3f4f6" }}>
+                        <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "#6b7280" }}>Facial Confidence</p>
+                        <p className="text-2xl font-black">{analysisResults?.facialConfidence}%</p>
+                      </div>
+                      <div className="p-4 rounded-xl text-center" style={{ backgroundColor: "#f9fafb", border: "1px solid #f3f4f6" }}>
+                        <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "#6b7280" }}>Speech Clarity</p>
+                        <p className="text-2xl font-black">{analysisResults?.speechClarity}%</p>
+                      </div>
+                      <div className="p-4 rounded-xl text-center" style={{ backgroundColor: "#f9fafb", border: "1px solid #f3f4f6" }}>
+                        <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "#6b7280" }}>Eye Contact</p>
+                        <p className="text-2xl font-black">{analysisResults?.eyeContact}%</p>
                       </div>
                     </div>
                   </div>

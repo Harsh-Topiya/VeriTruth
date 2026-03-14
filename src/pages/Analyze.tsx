@@ -154,17 +154,23 @@ export default function Analyze() {
         facialScore: 80,
         voiceScore: 90,
         fusionScore: 85,
+        facialConfidence: 82,
+        speechClarity: 88,
+        eyeContact: 75,
         facialFeatures: [
           { feature: "Micro-expressions", value: 80, fullMark: 100 },
           { feature: "Eye Movement", value: 75, fullMark: 100 },
           { feature: "Muscle Tension", value: 85, fullMark: 100 },
-          { feature: "Blink Rate", value: 90, fullMark: 100 }
+          { feature: "Blink Rate", value: 90, fullMark: 100 },
+          { feature: "Facial Confidence", value: 82, fullMark: 100 },
+          { feature: "Eye Contact", value: 75, fullMark: 100 }
         ],
         voiceFeatures: [
           { feature: "Frequency Jitter", value: 5 },
           { feature: "Amplitude Shimmer", value: 4 },
           { feature: "Pitch Variance", value: 6 },
-          { feature: "Speech Rate", value: 8 }
+          { feature: "Speech Rate", value: 8 },
+          { feature: "Speech Clarity", value: 88 }
         ],
         timelineData: Array.from({ length: 10 }, (_, i) => ({
           time: `${i}s`,
