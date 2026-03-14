@@ -2,9 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { History as HistoryIcon, Trash2, ChevronRight, Calendar, Clock, Brain, Shield, AlertCircle, CheckCircle2, Zap, Activity, Mic, Eye } from "lucide-react";
+import { History as HistoryIcon, Trash2, ChevronRight, Calendar, Clock, Brain, Shield, AlertCircle, CheckCircle2, Zap, Activity, Mic, Eye, Waves, Timer, BarChart3, Smile, User } from "lucide-react";
 import { useAnalysis } from "../context/AnalysisContext";
 import { Background } from "../components/Background";
+import { MetricGauge } from "../components/MetricGauge";
 
 interface Session {
   id: number;
@@ -125,6 +126,7 @@ export default function History() {
               const { date, time } = formatDate(session.timestamp);
               const isTruth = session.verdict === "truth";
               const isExpanded = expandedSessionId === session.id;
+              const fullResults = isExpanded ? JSON.parse(session.fullResults) : null;
               
               return (
                 <motion.div
@@ -174,6 +176,20 @@ export default function History() {
                             <div className="flex items-center gap-1.5">
                               <div className="w-1 h-1 rounded-full bg-zinc-700" />
                               <span>{session.recordingDuration || 0}s</span>
+                            </div>
+                            <div className="flex items-center gap-4 ml-2 border-l border-white/10 pl-4">
+                              <div className="flex items-center gap-2" title={`Facial Confidence: ${session.facialConfidence}%`}>
+                                <Shield className="w-3 h-3 text-emerald-500/70" />
+                                <div className="w-10 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                                  <div className="h-full bg-emerald-500" style={{ width: `${session.facialConfidence}%` }} />
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2" title={`Voice Stress Index: ${session.voiceScore}%`}>
+                                <Activity className="w-3 h-3 text-blue-500/70" />
+                                <div className="w-10 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                                  <div className="h-full bg-blue-500" style={{ width: `${session.voiceScore}%` }} />
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -246,94 +262,82 @@ export default function History() {
                         transition={{ duration: 0.3, ease: "easeInOut" }}
                         className="border-t border-white/5 bg-white/[0.02]"
                       >
-                        <div className="p-8 space-y-8">
-                          <div className="grid md:grid-cols-3 gap-6">
-                            <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                              <div className="flex items-center gap-2 mb-3 text-emerald-400">
-                                <Activity className="w-4 h-4" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Facial Score</span>
-                              </div>
-                              <div className="text-2xl font-black">{session.facialScore}%</div>
-                              <div className="mt-2 h-1 bg-zinc-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-emerald-500" style={{ width: `${session.facialScore}%` }} />
-                              </div>
+                        <div className="p-8 space-y-10">
+                          {/* Facial Indicators */}
+                          <div>
+                            <div className="flex items-center gap-3 mb-6">
+                              <div className="w-1 h-5 bg-emerald-500 rounded-full" />
+                              <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400">Facial Indicators</h4>
                             </div>
-                            
-                            <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                              <div className="flex items-center gap-2 mb-3 text-blue-400">
-                                <Mic className="w-4 h-4" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Voice Score</span>
-                              </div>
-                              <div className="text-2xl font-black">{session.voiceScore}%</div>
-                              <div className="mt-2 h-1 bg-zinc-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-blue-500" style={{ width: `${session.voiceScore}%` }} />
-                              </div>
-                            </div>
-
-                            <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                              <div className="flex items-center gap-2 mb-3 text-purple-400">
-                                <Zap className="w-4 h-4" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Fusion Score</span>
-                              </div>
-                              <div className="text-2xl font-black">{session.fusionScore}%</div>
-                              <div className="mt-2 h-1 bg-zinc-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-purple-500" style={{ width: `${session.fusionScore}%` }} />
-                              </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                              {fullResults?.facialFeatures?.map((f: any, i: number) => (
+                                <MetricGauge 
+                                  key={i}
+                                  label={f.feature} 
+                                  value={f.value} 
+                                  icon={
+                                    f.feature.includes("Blink") ? Eye :
+                                    f.feature.includes("Micro") ? Smile :
+                                    f.feature.includes("Eye") ? Eye :
+                                    f.feature.includes("Lip") ? User :
+                                    f.feature.includes("Brow") ? User :
+                                    f.feature.includes("Symmetry") ? Shield :
+                                    Shield
+                                  } 
+                                  color="bg-emerald-500" 
+                                  size="sm"
+                                />
+                              ))}
                             </div>
                           </div>
 
-                          <div className="grid md:grid-cols-3 gap-6">
-                            <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                              <div className="flex items-center gap-2 mb-3 text-emerald-400">
-                                <Shield className="w-4 h-4" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Facial Confidence</span>
-                              </div>
-                              <div className="text-2xl font-black">{session.facialConfidence}%</div>
-                              <div className="mt-2 h-1 bg-zinc-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-emerald-500" style={{ width: `${session.facialConfidence}%` }} />
-                              </div>
+                          {/* Vocal Indicators */}
+                          <div>
+                            <div className="flex items-center gap-3 mb-6">
+                              <div className="w-1 h-5 bg-blue-500 rounded-full" />
+                              <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400">Vocal Indicators</h4>
                             </div>
-                            
-                            <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                              <div className="flex items-center gap-2 mb-3 text-blue-400">
-                                <Activity className="w-4 h-4" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Speech Clarity</span>
-                              </div>
-                              <div className="text-2xl font-black">{session.speechClarity}%</div>
-                              <div className="mt-2 h-1 bg-zinc-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-blue-500" style={{ width: `${session.speechClarity}%` }} />
-                              </div>
-                            </div>
-
-                            <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                              <div className="flex items-center gap-2 mb-3 text-purple-400">
-                                <Eye className="w-4 h-4" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Eye Contact</span>
-                              </div>
-                              <div className="text-2xl font-black">{session.eyeContact}%</div>
-                              <div className="mt-2 h-1 bg-zinc-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-purple-500" style={{ width: `${session.eyeContact}%` }} />
-                              </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                              {fullResults?.voiceFeatures?.map((f: any, i: number) => (
+                                <MetricGauge 
+                                  key={i}
+                                  label={f.feature} 
+                                  value={f.value} 
+                                  icon={
+                                    f.feature.includes("Pitch") ? Waves :
+                                    f.feature.includes("Rate") ? Timer :
+                                    f.feature.includes("Pause") ? Clock :
+                                    f.feature.includes("Tremor") ? Activity :
+                                    f.feature.includes("MFCC") ? BarChart3 :
+                                    f.feature.includes("Jitter") ? Activity :
+                                    Mic
+                                  } 
+                                  color="bg-blue-500" 
+                                  size="sm"
+                                />
+                              ))}
                             </div>
                           </div>
 
-                          <div className="p-6 rounded-2xl bg-white/5 border border-white/5">
+                          <div className="p-6 rounded-2xl bg-white/5 border border-white/5 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-5">
+                              <Brain className="w-24 h-24 text-emerald-500" />
+                            </div>
                             <div className="flex items-center gap-2 mb-4 text-zinc-400">
                               <Brain className="w-4 h-4" />
                               <span className="text-[10px] font-bold uppercase tracking-widest">AI Analysis Summary</span>
                             </div>
-                            <p className="text-zinc-300 text-sm leading-relaxed italic">
+                            <p className="text-zinc-300 text-sm leading-relaxed italic relative z-10">
                               "{session.aiAnalysis}"
                             </p>
-                          </div>
-
-                          <div className="flex justify-end">
-                            <button
-                              onClick={() => handleGoToResults(session)}
-                              className="px-6 py-3 rounded-xl bg-white text-black font-bold text-xs hover:bg-zinc-200 transition-all flex items-center gap-2"
-                            >
-                              View Full Detailed Report <ChevronRight className="w-4 h-4" />
-                            </button>
+                            <div className="mt-6 pt-6 border-t border-white/5 flex justify-end items-center">
+                              <button
+                                onClick={() => handleGoToResults(session)}
+                                className="px-6 py-2.5 rounded-xl bg-white text-black font-bold text-[10px] uppercase tracking-wider hover:bg-zinc-200 transition-all flex items-center gap-2"
+                              >
+                                View Full Report <ChevronRight className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </motion.div>

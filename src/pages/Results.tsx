@@ -16,7 +16,16 @@ import {
   History,
   X,
   FileText,
-  Printer
+  Printer,
+  Eye,
+  Mic,
+  Waves,
+  Timer,
+  Clock,
+  BarChart3,
+  Smile,
+  Wind,
+  User
 } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -38,6 +47,7 @@ import {
 } from "recharts";
 import { motion, AnimatePresence } from "motion/react";
 import { Background } from "../components/Background";
+import { MetricGauge } from "../components/MetricGauge";
 
 export default function Results() {
   const navigate = useNavigate();
@@ -223,9 +233,9 @@ export default function Results() {
           </div>
 
           {/* Charts Grid */}
-          <div className="grid lg:grid-cols-3 gap-8 mb-8">
+          <div className="grid lg:grid-cols-1 gap-8 mb-8">
             {/* Timeline Chart */}
-            <div className="lg:col-span-2 p-6 bg-slate-900/40 border border-white/5 rounded-3xl">
+            <div className="p-6 bg-slate-900/40 border border-white/5 rounded-3xl">
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-base font-bold flex items-center gap-2">
                   <Activity className="w-4 h-4 text-blue-500" />
@@ -240,7 +250,7 @@ export default function Results() {
                   </span>
                 </div>
               </div>
-              <div className="h-[250px] w-full">
+              <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={analysisResults.timelineData}>
                     <defs>
@@ -266,84 +276,88 @@ export default function Results() {
                 </ResponsiveContainer>
               </div>
             </div>
-
-            {/* Radar Chart */}
-            <div className="p-6 bg-slate-900/40 border border-white/5 rounded-3xl">
-              <h3 className="text-base font-bold mb-8 flex items-center gap-2">
-                <Zap className="w-4 h-4 text-purple-500" />
-                Modality Contribution
-              </h3>
-              <div className="h-[250px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={analysisResults.facialFeatures}>
-                    <PolarGrid stroke="#1e293b" />
-                    <PolarAngleAxis dataKey="feature" stroke="#64748b" fontSize={9} />
-                    <Radar
-                      name="Score"
-                      dataKey="value"
-                      stroke="#a855f7"
-                      fill="#a855f7"
-                      fillOpacity={0.6}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
           </div>
 
           {/* Detailed Breakdown */}
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1 h-6 bg-emerald-500 rounded-full" />
+              <h3 className="text-lg font-black uppercase tracking-tighter">Facial Indicators</h3>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+              {analysisResults.facialFeatures.map((f, i) => (
+                <MetricGauge 
+                  key={i}
+                  label={f.feature} 
+                  value={f.value} 
+                  icon={
+                    f.feature.includes("Blink") ? Eye :
+                    f.feature.includes("Micro") ? Smile :
+                    f.feature.includes("Eye") ? Eye :
+                    f.feature.includes("Lip") ? User :
+                    f.feature.includes("Brow") ? User :
+                    f.feature.includes("Symmetry") ? Shield :
+                    Shield
+                  } 
+                  color="bg-emerald-500" 
+                  size="sm"
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1 h-6 bg-blue-500 rounded-full" />
+              <h3 className="text-lg font-black uppercase tracking-tighter">Vocal Indicators</h3>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+              {analysisResults.voiceFeatures.map((f, i) => (
+                <MetricGauge 
+                  key={i}
+                  label={f.feature} 
+                  value={f.value} 
+                  icon={
+                    f.feature.includes("Pitch") ? Waves :
+                    f.feature.includes("Rate") ? Timer :
+                    f.feature.includes("Pause") ? Clock :
+                    f.feature.includes("Tremor") ? Activity :
+                    f.feature.includes("MFCC") ? BarChart3 :
+                    f.feature.includes("Jitter") ? Activity :
+                    Mic
+                  } 
+                  color="bg-blue-500" 
+                  size="sm"
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-1 gap-8">
             {/* AI Summary */}
-            <div className="p-6 bg-slate-900/40 border border-white/5 rounded-3xl">
+            <div className="p-8 bg-slate-900/40 border border-white/5 rounded-3xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-10">
+                <Brain className="w-32 h-32 text-emerald-500" />
+              </div>
               <h3 className="text-base font-bold mb-6 flex items-center gap-2">
                 <Brain className="w-4 h-4 text-emerald-500" />
                 AI Analysis Summary
               </h3>
               <div className="prose prose-invert max-w-none">
-                <p className="text-sm text-zinc-400 leading-relaxed italic">
+                <p className="text-lg text-zinc-300 leading-relaxed italic font-medium">
                   "{analysisResults.aiAnalysis}"
                 </p>
               </div>
-              <div className="mt-8 pt-8 border-t border-white/5">
+              <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center">
                     <Shield className="w-5 h-5 text-emerald-500" />
                   </div>
                   <div>
                     <p className="text-xs font-bold">VeriTruth Core v4.2</p>
-                    <p className="text-[10px] text-zinc-500">Neural Behavioral Engine</p>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Neural Behavioral Engine</p>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Feature Scores */}
-            <div className="p-6 bg-slate-900/40 border border-white/5 rounded-3xl">
-              <h3 className="text-base font-bold mb-6">Feature Breakdown</h3>
-              <div className="space-y-6">
-                {[
-                  { label: "Facial Micro-expressions", score: analysisResults.facialScore, color: "bg-emerald-500" },
-                  { label: "Vocal Stress Index", score: analysisResults.voiceScore, color: "bg-blue-500" },
-                  { label: "Cognitive Load Fusion", score: analysisResults.fusionScore, color: "bg-purple-500" },
-                  { label: "Facial Confidence", score: analysisResults.facialConfidence, color: "bg-emerald-400" },
-                  { label: "Speech Clarity", score: analysisResults.speechClarity, color: "bg-blue-400" },
-                  { label: "Eye Contact", score: analysisResults.eyeContact, color: "bg-purple-400" }
-                ].map((item, i) => (
-                  <div key={i}>
-                    <div className="flex justify-between text-[10px] font-bold mb-2 uppercase tracking-widest">
-                      <span className="text-zinc-400">{item.label}</span>
-                      <span>{item.score}%</span>
-                    </div>
-                    <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${item.score}%` }}
-                        transition={{ duration: 1, delay: 0.5 }}
-                        className={`h-full ${item.color}`}
-                      />
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           </div>
