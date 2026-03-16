@@ -253,7 +253,7 @@ export default function Analyze() {
           combined: 82 + Math.random() * 10
         })),
         recordingDuration: recordingTimeRef.current,
-        aiAnalysis: "Analysis complete. Multimodal fusion indicates high probability of truthful behavior based on micro-expression clusters and vocal frequency fluctuations."
+        aiAnalysis: "Detailed Analysis: The subject demonstrated consistent behavioral patterns throughout the session. Facial analysis revealed stable micro-expressions with a normal blink rate of 12-15 per minute, suggesting a relaxed cognitive state. Eye contact remained steady at approximately 75%, which is within the baseline for truthful communication. Vocal stress analysis showed minimal frequency jitter and a consistent speech rate, further supporting the verdict of truthfulness. No significant clusters of deceptive indicators were detected in either the visual or auditory modalities."
       };
       setAnalysisResults(mockResults);
       navigate("/results");

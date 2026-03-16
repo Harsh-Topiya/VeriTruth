@@ -52,25 +52,25 @@ You must respond with ONLY a valid JSON object (no markdown, no explanation) in 
   "speechClarity": number (0-100),
   "eyeContact": number (0-100),
   "facialFeatures": [
-    {"feature": "Blink Rate", "value": number, "fullMark": 100},
-    {"feature": "Micro-expressions", "value": number, "fullMark": 100},
-    {"feature": "Eye Contact", "value": number, "fullMark": 100},
-    {"feature": "Lip Tension", "value": number, "fullMark": 100},
-    {"feature": "Brow Movement", "value": number, "fullMark": 100},
-    {"feature": "Facial Symmetry", "value": number, "fullMark": 100},
-    {"feature": "Facial Confidence", "value": number, "fullMark": 100}
+    {"feature": "Blink Rate", "value": number, "fullMark": 100, "details": "Specific observation about this feature"},
+    {"feature": "Micro-expressions", "value": number, "fullMark": 100, "details": "Specific observation about this feature"},
+    {"feature": "Eye Contact", "value": number, "fullMark": 100, "details": "Specific observation about this feature"},
+    {"feature": "Lip Tension", "value": number, "fullMark": 100, "details": "Specific observation about this feature"},
+    {"feature": "Brow Movement", "value": number, "fullMark": 100, "details": "Specific observation about this feature"},
+    {"feature": "Facial Symmetry", "value": number, "fullMark": 100, "details": "Specific observation about this feature"},
+    {"feature": "Facial Confidence", "value": number, "fullMark": 100, "details": "Specific observation about this feature"}
   ],
   "voiceFeatures": [
-    {"feature": "Pitch Variance", "value": number},
-    {"feature": "Speech Rate", "value": number},
-    {"feature": "Pause Patterns", "value": number},
-    {"feature": "Voice Tremor", "value": number},
-    {"feature": "MFCC Score", "value": number},
-    {"feature": "Jitter", "value": number},
-    {"feature": "Speech Clarity", "value": number}
+    {"feature": "Pitch Variance", "value": number, "details": "Specific observation about this feature"},
+    {"feature": "Speech Rate", "value": number, "details": "Specific observation about this feature"},
+    {"feature": "Pause Patterns", "value": number, "details": "Specific observation about this feature"},
+    {"feature": "Voice Tremor", "value": number, "details": "Specific observation about this feature"},
+    {"feature": "MFCC Score", "value": number, "details": "Specific observation about this feature"},
+    {"feature": "Jitter", "value": number, "details": "Specific observation about this feature"},
+    {"feature": "Speech Clarity", "value": number, "details": "Specific observation about this feature"}
   ],
   "timelineData": [array of {time: "0-5s", facial: number, voice: number, combined: number}],
-  "aiAnalysis": "Brief 2-3 sentence analysis explaining the key indicators that led to this verdict. If insufficient_data, explain what is missing."
+  "aiAnalysis": "A detailed, structured analysis (at least 150-200 words) explaining the key indicators that led to this verdict. Break it down into specific observations about facial micro-expressions, vocal stress patterns, and overall behavioral consistency. If insufficient_data, explain exactly what is missing and why it's critical for a valid fusion analysis."
 }`;
 
 export async function analyzeVideo(videoBase64: string, duration: number, mimeType: string = "video/webm") {

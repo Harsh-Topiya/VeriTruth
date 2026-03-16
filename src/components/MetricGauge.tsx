@@ -7,10 +7,11 @@ interface MetricGaugeProps {
   icon: LucideIcon;
   color: string;
   size?: "sm" | "md";
+  details?: string;
   key?: string | number;
 }
 
-export function MetricGauge({ label, value, icon: Icon, color, size = "md" }: MetricGaugeProps) {
+export function MetricGauge({ label, value, icon: Icon, color, size = "md", details }: MetricGaugeProps) {
   const radius = size === "md" ? 40 : 30;
   const stroke = size === "md" ? 4 : 3;
   const normalizedRadius = radius - stroke * 2;
@@ -18,11 +19,20 @@ export function MetricGauge({ label, value, icon: Icon, color, size = "md" }: Me
   const strokeDashoffset = circumference - (value / 100) * circumference;
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 rounded-3xl bg-white/5 border border-white/5 relative overflow-hidden group">
+    <div className="flex flex-col items-center justify-center p-4 rounded-3xl bg-white/5 border border-white/5 relative overflow-visible group">
       {/* Background Glow */}
       <div 
         className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 blur-2xl ${color}`} 
       />
+
+      {/* Tooltip */}
+      {details && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-3 bg-zinc-900 border border-white/10 rounded-xl text-[10px] leading-relaxed text-zinc-300 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-[100] shadow-2xl">
+          <div className="font-bold text-white mb-1 uppercase tracking-widest">{label} Deep Dive</div>
+          {details}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-zinc-900" />
+        </div>
+      )}
       
       <div className="relative mb-3">
         <svg

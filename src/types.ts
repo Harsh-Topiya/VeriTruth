@@ -13,10 +13,12 @@ export interface AnalysisResults {
     feature: string;
     value: number;
     fullMark: number;
+    details?: string;
   }[];
   voiceFeatures: {
     feature: string;
     value: number;
+    details?: string;
   }[];
   timelineData: {
     time: string;

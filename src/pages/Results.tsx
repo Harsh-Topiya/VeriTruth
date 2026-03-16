@@ -296,6 +296,7 @@ export default function Results() {
                       key={i}
                       label={f.feature} 
                       value={f.value} 
+                      details={f.details}
                       icon={
                         f.feature.includes("Blink") ? Eye :
                         f.feature.includes("Micro") ? Smile :
@@ -323,6 +324,7 @@ export default function Results() {
                       key={i}
                       label={f.feature} 
                       value={f.value} 
+                      details={f.details}
                       icon={
                         f.feature.includes("Pitch") ? Waves :
                         f.feature.includes("Rate") ? Timer :
@@ -349,12 +351,12 @@ export default function Results() {
               </div>
               <h3 className="text-base font-bold mb-6 flex items-center gap-2">
                 <Brain className="w-4 h-4 text-emerald-500" />
-                AI Analysis Summary
+                Detailed AI Behavioral Summary
               </h3>
               <div className="prose prose-invert max-w-none">
-                <p className="text-lg text-zinc-300 leading-relaxed italic font-medium">
-                  "{analysisResults.aiAnalysis}"
-                </p>
+                <div className="text-lg text-zinc-300 leading-relaxed font-medium whitespace-pre-wrap">
+                  {analysisResults.aiAnalysis}
+                </div>
               </div>
               <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -491,10 +493,10 @@ export default function Results() {
                   </div>
 
                   <div className="mb-12">
-                    <h2 className="text-sm font-bold uppercase tracking-widest pb-2 mb-6" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>AI Behavioral Summary</h2>
-                    <p className="text-lg leading-relaxed italic" style={{ color: "#27272a" }}>
-                      "{analysisResults?.aiAnalysis}"
-                    </p>
+                    <h2 className="text-sm font-bold uppercase tracking-widest pb-2 mb-6" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>Detailed AI Behavioral Summary</h2>
+                    <div className="text-base leading-relaxed whitespace-pre-wrap" style={{ color: "#27272a" }}>
+                      {analysisResults?.aiAnalysis}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-12 mb-12">
