@@ -1,42 +1,18 @@
 import { Link } from "react-router-dom";
-import { Shield, Brain, Mic, Eye, ArrowRight, CheckCircle2, Zap } from "lucide-react";
+import { Shield, Brain, Mic, Eye, ArrowRight, CheckCircle2, Zap, BarChart3 } from "lucide-react";
 import { motion } from "motion/react";
 import { Background } from "../components/Background";
+import Header from "../components/Header";
+import { useAnalysis } from "../context/AnalysisContext";
 
 export default function Index() {
+  const { analysisResults } = useAnalysis();
+
   return (
     <div className="min-h-screen bg-[#020617] text-white font-sans selection:bg-emerald-500/30 overflow-x-hidden">
       <Background />
 
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-slate-950/40 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
-              <Shield className="w-6 h-6 text-black" />
-            </div>
-            <div className="flex flex-col -space-y-1">
-              <div className="text-xl font-bold tracking-tight">
-                <span className="text-white">Veri</span>
-                <span className="text-emerald-400">Truth</span>
-              </div>
-              <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-zinc-400">AI Deception Analysis</span>
-            </div>
-          </div>
-          <div className="hidden md:flex items-center gap-8 text-xs font-medium text-zinc-400">
-            <a href="#technology" className="hover:text-white transition-colors">Technology</a>
-            <a href="#how-it-works" className="hover:text-white transition-colors">How it Works</a>
-            <Link to="/history" className="hover:text-white transition-colors">History</Link>
-            <Link to="/results" className="hover:text-white transition-colors">Results</Link>
-          </div>
-          <Link 
-            to="/analyze" 
-            className="px-5 py-2.5 bg-emerald-500 text-black rounded-full text-xs font-bold hover:bg-emerald-400 transition-all active:scale-95 shadow-lg shadow-emerald-500/20"
-          >
-            Start Analysis
-          </Link>
-        </div>
-      </nav>
+      <Header />
 
       {/* Hero Section */}
       <header className="relative min-h-screen flex items-center justify-center pt-20 pb-32">
@@ -64,6 +40,15 @@ export default function Index() {
                   Begin New Session
                   <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                 </Link>
+                {analysisResults && (
+                  <Link 
+                    to="/results" 
+                    className="px-10 py-5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full text-lg font-bold hover:bg-emerald-500/20 transition-all active:scale-95 flex items-center gap-3"
+                  >
+                    <BarChart3 className="w-6 h-6" />
+                    Latest Results
+                  </Link>
+                )}
                 <Link 
                   to="/history" 
                   className="px-10 py-5 bg-white/5 border border-white/10 backdrop-blur-md text-white rounded-full text-lg font-bold hover:bg-white/10 transition-all active:scale-95"

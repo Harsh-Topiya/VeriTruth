@@ -48,6 +48,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { Background } from "../components/Background";
 import { MetricGauge } from "../components/MetricGauge";
+import Header from "../components/Header";
 
 export default function Results() {
   const navigate = useNavigate();
@@ -120,61 +121,35 @@ export default function Results() {
   }
 
   const isTruth = analysisResults.verdict === "truth";
+  const isInsufficient = analysisResults.verdict === "insufficient_data";
 
   return (
     <div className="min-h-screen bg-[#020617] text-white font-sans selection:bg-emerald-500/30 flex flex-col relative">
       <Background />
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/40 backdrop-blur-xl border-b border-white/5 p-6 md:px-12">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="flex items-center gap-4">
+      <Header 
+        extraButtons={
+          <>
             <button 
-              onClick={() => navigate("/analyze")}
-              className="p-2 hover:bg-zinc-900 rounded-full transition-colors"
+              onClick={() => navigate("/")}
+              className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-white/10 transition-all text-zinc-400 hover:text-white"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4" /> Back
             </button>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                <Shield className="w-5 h-5 text-black" />
-              </div>
-              <div className="flex flex-col -space-y-1">
-                <div className="text-base font-bold tracking-tight">
-                  <span className="text-white">Veri</span>
-                  <span className="text-emerald-400">Truth</span>
-                </div>
-                <span className="text-[7px] font-bold uppercase tracking-[0.2em] text-zinc-500">AI Deception Analysis</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <Link 
-              to="/"
-              className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold flex items-center gap-2 hover:bg-white/10 transition-all"
-            >
-              <Home className="w-3 h-3" /> Home
-            </Link>
-            <Link 
-              to="/history"
-              className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold flex items-center gap-2 hover:bg-white/10 transition-all"
-            >
-              <History className="w-3 h-3" /> History
-            </Link>
             <button 
               onClick={handleExport}
-              className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold flex items-center gap-2 hover:bg-white/10 transition-all"
+              className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-white/10 transition-all text-zinc-400 hover:text-white"
             >
-              <Download className="w-3 h-3" /> Export
+              <Download className="w-4 h-4" /> Export
             </button>
             <button 
               onClick={handleShare}
-              className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold flex items-center gap-2 hover:bg-white/10 transition-all"
+              className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-emerald-500/20 transition-all text-emerald-400"
             >
-              <Share2 className="w-3 h-3" /> Share
+              <Share2 className="w-4 h-4" /> Share
             </button>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       <main className="flex-grow pt-32 pb-12 px-6 md:px-12 overflow-y-auto relative z-10">
         <div className="max-w-7xl mx-auto">
@@ -184,23 +159,27 @@ export default function Results() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className={`col-span-2 p-6 rounded-3xl border flex items-center justify-between ${
-                isTruth 
-                  ? "bg-emerald-500/5 border-emerald-500/20" 
-                  : "bg-red-500/5 border-red-500/20"
+                isInsufficient
+                  ? "bg-amber-500/5 border-amber-500/20"
+                  : isTruth 
+                    ? "bg-emerald-500/5 border-emerald-500/20" 
+                    : "bg-red-500/5 border-red-500/20"
               }`}
             >
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-2 block">Final Verdict</span>
                 <h2 className={`text-4xl font-black tracking-tighter uppercase ${
-                  isTruth ? "text-emerald-500" : "text-red-500"
+                  isInsufficient ? "text-amber-500" : isTruth ? "text-emerald-500" : "text-red-500"
                 }`}>
-                  {analysisResults.verdict}
+                  {isInsufficient ? "Incomplete Data" : analysisResults.verdict}
                 </h2>
               </div>
               <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-                isTruth ? "bg-emerald-500/20" : "bg-red-500/20"
+                isInsufficient ? "bg-amber-500/20" : isTruth ? "bg-emerald-500/20" : "bg-red-500/20"
               }`}>
-                {isTruth ? (
+                {isInsufficient ? (
+                  <AlertTriangle className="w-8 h-8 text-amber-500" />
+                ) : isTruth ? (
                   <CheckCircle2 className="w-8 h-8 text-emerald-500" />
                 ) : (
                   <AlertTriangle className="w-8 h-8 text-red-500" />
@@ -233,105 +212,134 @@ export default function Results() {
           </div>
 
           {/* Charts Grid */}
-          <div className="grid lg:grid-cols-1 gap-8 mb-8">
-            {/* Timeline Chart */}
-            <div className="p-6 bg-slate-900/40 border border-white/5 rounded-3xl">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-base font-bold flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-blue-500" />
-                  Confidence Over Time
-                </h3>
-                <div className="flex gap-4 text-[10px] font-bold uppercase tracking-widest">
-                  <span className="flex items-center gap-1.5 text-emerald-500">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> Facial
-                  </span>
-                  <span className="flex items-center gap-1.5 text-blue-500">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" /> Voice
-                  </span>
+          {!isInsufficient && (
+            <div className="grid lg:grid-cols-1 gap-8 mb-8">
+              {/* Timeline Chart */}
+              <div className="p-6 bg-slate-900/40 border border-white/5 rounded-3xl">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-base font-bold flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-blue-500" />
+                    Confidence Over Time
+                  </h3>
+                  <div className="flex gap-4 text-[10px] font-bold uppercase tracking-widest">
+                    <span className="flex items-center gap-1.5 text-emerald-500">
+                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> Facial
+                    </span>
+                    <span className="flex items-center gap-1.5 text-blue-500">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" /> Voice
+                    </span>
+                  </div>
+                </div>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={analysisResults.timelineData}>
+                      <defs>
+                        <linearGradient id="colorFacial" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorVoice" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                      <XAxis dataKey="time" stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
+                      <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px' }}
+                        itemStyle={{ fontSize: '10px', fontWeight: 'bold' }}
+                      />
+                      <Area type="monotone" dataKey="facial" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorFacial)" />
+                      <Area type="monotone" dataKey="voice" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorVoice)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={analysisResults.timelineData}>
-                    <defs>
-                      <linearGradient id="colorFacial" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="colorVoice" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                    <XAxis dataKey="time" stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px' }}
-                      itemStyle={{ fontSize: '10px', fontWeight: 'bold' }}
-                    />
-                    <Area type="monotone" dataKey="facial" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorFacial)" />
-                    <Area type="monotone" dataKey="voice" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorVoice)" />
-                  </AreaChart>
-                </ResponsiveContainer>
+            </div>
+          )}
+
+          {isInsufficient && (
+            <div className="p-12 bg-amber-500/5 border border-amber-500/20 rounded-3xl mb-8 flex flex-col items-center text-center">
+              <div className="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mb-6">
+                <AlertTriangle className="w-10 h-10 text-amber-500" />
+              </div>
+              <h3 className="text-2xl font-black uppercase tracking-tighter mb-4">Incomplete Analysis Data</h3>
+              <p className="text-zinc-400 max-w-2xl text-lg leading-relaxed">
+                VeriTruth requires both <span className="text-emerald-400 font-bold">visual facial tracking</span> and <span className="text-blue-400 font-bold">voice stress analysis</span> to provide a reliable verdict. 
+                {analysisResults.missingFeature === 'voice' && " No audible speech was detected in this recording."}
+                {analysisResults.missingFeature === 'visual' && " No clear facial features were detected in this recording."}
+                {analysisResults.missingFeature === 'both' && " Neither facial features nor audible speech were detected."}
+              </p>
+              <div className="mt-8 flex gap-4">
+                <button 
+                  onClick={() => navigate("/analyze")}
+                  className="px-8 py-3 bg-amber-500 text-black rounded-full font-bold hover:bg-amber-400 transition-all"
+                >
+                  Try Again
+                </button>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Detailed Breakdown */}
-          <div className="mb-12">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-1 h-6 bg-emerald-500 rounded-full" />
-              <h3 className="text-lg font-black uppercase tracking-tighter">Facial Indicators</h3>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-              {analysisResults.facialFeatures.map((f, i) => (
-                <MetricGauge 
-                  key={i}
-                  label={f.feature} 
-                  value={f.value} 
-                  icon={
-                    f.feature.includes("Blink") ? Eye :
-                    f.feature.includes("Micro") ? Smile :
-                    f.feature.includes("Eye") ? Eye :
-                    f.feature.includes("Lip") ? User :
-                    f.feature.includes("Brow") ? User :
-                    f.feature.includes("Symmetry") ? Shield :
-                    Shield
-                  } 
-                  color="bg-emerald-500" 
-                  size="sm"
-                />
-              ))}
-            </div>
-          </div>
+          {!isInsufficient && (
+            <>
+              <div className="mb-12">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-1 h-6 bg-emerald-500 rounded-full" />
+                  <h3 className="text-lg font-black uppercase tracking-tighter">Facial Indicators</h3>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                  {analysisResults.facialFeatures.map((f, i) => (
+                    <MetricGauge 
+                      key={i}
+                      label={f.feature} 
+                      value={f.value} 
+                      icon={
+                        f.feature.includes("Blink") ? Eye :
+                        f.feature.includes("Micro") ? Smile :
+                        f.feature.includes("Eye") ? Eye :
+                        f.feature.includes("Lip") ? User :
+                        f.feature.includes("Brow") ? User :
+                        f.feature.includes("Symmetry") ? Shield :
+                        Shield
+                      } 
+                      color="bg-emerald-500" 
+                      size="sm"
+                    />
+                  ))}
+                </div>
+              </div>
 
-          <div className="mb-12">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-1 h-6 bg-blue-500 rounded-full" />
-              <h3 className="text-lg font-black uppercase tracking-tighter">Vocal Indicators</h3>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-              {analysisResults.voiceFeatures.map((f, i) => (
-                <MetricGauge 
-                  key={i}
-                  label={f.feature} 
-                  value={f.value} 
-                  icon={
-                    f.feature.includes("Pitch") ? Waves :
-                    f.feature.includes("Rate") ? Timer :
-                    f.feature.includes("Pause") ? Clock :
-                    f.feature.includes("Tremor") ? Activity :
-                    f.feature.includes("MFCC") ? BarChart3 :
-                    f.feature.includes("Jitter") ? Activity :
-                    Mic
-                  } 
-                  color="bg-blue-500" 
-                  size="sm"
-                />
-              ))}
-            </div>
-          </div>
+              <div className="mb-12">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-1 h-6 bg-blue-500 rounded-full" />
+                  <h3 className="text-lg font-black uppercase tracking-tighter">Vocal Indicators</h3>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                  {analysisResults.voiceFeatures.map((f, i) => (
+                    <MetricGauge 
+                      key={i}
+                      label={f.feature} 
+                      value={f.value} 
+                      icon={
+                        f.feature.includes("Pitch") ? Waves :
+                        f.feature.includes("Rate") ? Timer :
+                        f.feature.includes("Pause") ? Clock :
+                        f.feature.includes("Tremor") ? Activity :
+                        f.feature.includes("MFCC") ? BarChart3 :
+                        f.feature.includes("Jitter") ? Activity :
+                        Mic
+                      } 
+                      color="bg-blue-500" 
+                      size="sm"
+                    />
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
 
           <div className="grid lg:grid-cols-1 gap-8">
             {/* AI Summary */}

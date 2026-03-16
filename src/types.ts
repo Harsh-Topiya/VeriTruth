@@ -1,5 +1,7 @@
 export interface AnalysisResults {
-  verdict: "truth" | "deception";
+  verdict: "truth" | "deception" | "insufficient_data";
+  status?: "complete" | "incomplete";
+  missingFeature?: "visual" | "voice" | "both";
   overallConfidence: number;
   facialScore: number;
   voiceScore: number;

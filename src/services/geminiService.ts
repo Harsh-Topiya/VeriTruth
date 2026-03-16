@@ -2,7 +2,14 @@ import { GoogleGenAI } from "@google/genai";
 
 const SYSTEM_PROMPT = `You are VeriTruth, an advanced AI-powered lie detection system that analyzes facial micro-expressions and voice stress patterns to determine truthfulness.
 
-ANALYSIS PARAMETERS AND RANGES:
+MANDATORY DATA REQUIREMENTS:
+- BOTH visual (facial) and voice (audio) features MUST be present for a valid prediction of truthfulness or deception.
+- If the video is silent (no voice detected), you MUST set "verdict" to "insufficient_data", "status" to "incomplete", and "missingFeature" to "voice".
+- If the video is a black screen or has no visible facial features (no visual detected), you MUST set "verdict" to "insufficient_data", "status" to "incomplete", and "missingFeature" to "visual".
+- If both are missing, set "missingFeature" to "both".
+- In case of "insufficient_data", do not provide scores for the missing features, and explain in "aiAnalysis" exactly what is missing and why it's needed.
+
+ANALYSIS PARAMETERS AND RANGES (Only if both features are present):
 - All scores must be between 0-100
 - Scores 0-40: Strong indicators of deception
 - Scores 41-59: Uncertain/neutral zone
@@ -34,7 +41,9 @@ VERDICT DETERMINATION:
 
 You must respond with ONLY a valid JSON object (no markdown, no explanation) in this exact format:
 {
-  "verdict": "truth" or "deception",
+  "verdict": "truth" | "deception" | "insufficient_data",
+  "status": "complete" | "incomplete",
+  "missingFeature": "visual" | "voice" | "both" | null,
   "overallConfidence": number (0-100),
   "facialScore": number (0-100),
   "voiceScore": number (0-100),
@@ -61,10 +70,10 @@ You must respond with ONLY a valid JSON object (no markdown, no explanation) in 
     {"feature": "Speech Clarity", "value": number}
   ],
   "timelineData": [array of {time: "0-5s", facial: number, voice: number, combined: number}],
-  "aiAnalysis": "Brief 2-3 sentence analysis explaining the key indicators that led to this verdict"
+  "aiAnalysis": "Brief 2-3 sentence analysis explaining the key indicators that led to this verdict. If insufficient_data, explain what is missing."
 }`;
 
-export async function analyzeVideo(videoBase64: string, duration: number) {
+export async function analyzeVideo(videoBase64: string, duration: number, mimeType: string = "video/webm") {
   // Initialize Gemini API on the frontend
   const ai = new GoogleGenAI({ apiKey: (process.env.GEMINI_API_KEY as string) });
   
@@ -85,7 +94,7 @@ Remember: ONLY return the JSON object, no other text.`;
           { text: userPrompt },
           {
             inlineData: {
-              mimeType: "video/webm",
+              mimeType: mimeType,
               data: videoBase64
             }
           }
@@ -97,4 +106,34 @@ Remember: ONLY return the JSON object, no other text.`;
   const text = response.text || "";
   const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
   return JSON.parse(cleanedText);
+}
+
+export async function verifyFace(imageBase64: string) {
+  const ai = new GoogleGenAI({ apiKey: (process.env.GEMINI_API_KEY as string) });
+  
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: [
+      {
+        parts: [
+          { text: "Analyze this image. Is there a clear human face visible and looking at the camera? Respond with ONLY a JSON object: {\"faceDetected\": boolean, \"reason\": \"string\"}" },
+          {
+            inlineData: {
+              mimeType: "image/jpeg",
+              data: imageBase64
+            }
+          }
+        ]
+      }
+    ],
+    config: {
+      responseMimeType: "application/json"
+    }
+  });
+
+  try {
+    return JSON.parse(response.text || "{\"faceDetected\": false}");
+  } catch (e) {
+    return { faceDetected: false, reason: "Failed to parse response" };
+  }
 }

@@ -6,6 +6,7 @@ import { History as HistoryIcon, Trash2, ChevronRight, Calendar, Clock, Brain, S
 import { useAnalysis } from "../context/AnalysisContext";
 import { Background } from "../components/Background";
 import { MetricGauge } from "../components/MetricGauge";
+import Header from "../components/Header";
 
 interface Session {
   id: number;
@@ -76,24 +77,17 @@ export default function History() {
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-emerald-500/30 relative">
       <Background />
-      <div className="max-w-4xl mx-auto px-6 py-12 relative z-10">
-        <header className="flex items-center justify-between mb-12">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-              <HistoryIcon className="w-6 h-6 text-emerald-400" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Analysis History</h1>
-              <p className="text-zinc-500 text-sm">Review your previous detection sessions</p>
-            </div>
+      <Header />
+      <div className="max-w-4xl mx-auto px-6 py-32 relative z-10">
+        <div className="flex items-center gap-4 mb-12">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+            <HistoryIcon className="w-6 h-6 text-emerald-400" />
           </div>
-          <button 
-            onClick={() => navigate("/")}
-            className="px-4 py-2 rounded-xl border border-white/10 hover:bg-white/5 transition-colors text-sm font-medium"
-          >
-            Back to Home
-          </button>
-        </header>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Analysis History</h1>
+            <p className="text-zinc-500 text-sm">Review your previous detection sessions</p>
+          </div>
+        </div>
 
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
