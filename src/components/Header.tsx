@@ -1,5 +1,5 @@
 import { useState, ReactNode } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Shield, Menu, X, History, Home, Zap, Info, HelpCircle, Upload, BarChart3 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAnalysis } from "../context/AnalysisContext";
@@ -10,17 +10,18 @@ interface HeaderProps {
 
 export default function Header({ extraButtons }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigate = useNavigate();
   const { analysisResults } = useAnalysis();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const navItems = [
     { label: "Home", icon: <Home className="w-4 h-4" />, path: "/" },
     { label: "History", icon: <History className="w-4 h-4" />, path: "/history" },
+    { label: "Results", icon: <BarChart3 className="w-4 h-4" />, path: "/results" },
     { label: "Live Analysis", icon: <Zap className="w-4 h-4" />, path: "/analyze" },
     { label: "Upload Analysis", icon: <Upload className="w-4 h-4" />, path: "/upload-analyze" },
-    { label: "Latest Results", icon: <BarChart3 className="w-4 h-4" />, path: "/results" },
     { label: "Technology", icon: <Info className="w-4 h-4" />, path: "/#technology" },
     { label: "How it Works", icon: <HelpCircle className="w-4 h-4" />, path: "/#how-it-works" },
   ];
@@ -38,7 +39,7 @@ export default function Header({ extraButtons }: HeaderProps) {
                 <span className="text-white">Veri</span>
                 <span className="text-emerald-400">Truth</span>
               </div>
-              <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-zinc-500">AI Deception Analysis</span>
+              <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-zinc-500">AI DECEPTION ANALYSIS</span>
             </div>
           </Link>
 

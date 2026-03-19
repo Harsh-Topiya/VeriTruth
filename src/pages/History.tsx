@@ -1,53 +1,56 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { History as HistoryIcon, Trash2, ChevronRight, Calendar, Clock, Brain, Shield, AlertCircle, CheckCircle2, Zap, Activity, Mic, Eye, Waves, Timer, BarChart3, Smile, User } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
+import { History as HistoryIcon, Trash2, ChevronRight, Calendar, Clock, Brain, Shield, AlertCircle, CheckCircle2, Zap, Activity, Mic, Eye, Waves, Timer, BarChart3, Smile, User, LogIn, ArrowLeft } from "lucide-react";
 import { useAnalysis } from "../context/AnalysisContext";
 import { Background } from "../components/Background";
 import { MetricGauge } from "../components/MetricGauge";
 import Header from "../components/Header";
+import { subscribeToUserSessions, deleteSession } from "../services/sessionService";
 
 interface Session {
-  id: number;
-  timestamp: string;
-  verdict: "truth" | "deception";
+  id: string;
+  timestamp: any;
+  verdict: "truth" | "deception" | "insufficient_data";
   overallConfidence: number;
-  facialScore: number;
-  voiceScore: number;
-  fusionScore: number;
-  facialConfidence: number;
-  speechClarity: number;
-  eyeContact: number;
   recordingDuration: number;
-  aiAnalysis: string;
-  fullResults: string;
+  analysisResults: any;
+  videoUrl?: string;
 }
 
 export default function History() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { setAnalysisResults } = useAnalysis();
-  const [expandedSessionId, setExpandedSessionId] = useState<number | null>(null);
-  const [deletingSessionId, setDeletingSessionId] = useState<number | null>(null);
+  const { setAnalysisResults, user, isAuthReady } = useAnalysis();
+  const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
+  const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
 
-  const { data: sessions, isLoading, error } = useQuery<Session[]>({
-    queryKey: ["sessions"],
-    queryFn: async () => {
-      const response = await fetch("/api/sessions");
-      if (!response.ok) throw new Error("Failed to fetch history");
-      return response.json();
-    },
-  });
+  useEffect(() => {
+    if (!user) {
+      if (isAuthReady) setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    const unsubscribe = subscribeToUserSessions(user.uid, (data) => {
+      setSessions(data as Session[]);
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [user, isAuthReady]);
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await fetch(`/api/sessions/${id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error("Failed to delete session");
-      return response.json();
+    mutationFn: async (id: string) => {
+      await deleteSession(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+      queryClient.invalidateQueries({ queryKey: ["sessions", user?.uid] });
     },
   });
 
@@ -60,33 +63,67 @@ export default function History() {
   };
 
   const handleGoToResults = (session: Session) => {
-    const fullResults = JSON.parse(session.fullResults);
-    setAnalysisResults(fullResults);
+    setAnalysisResults(session.analysisResults);
     navigate("/results");
   };
 
-  const formatDate = (dateStr: string) => {
-    // SQLite CURRENT_TIMESTAMP is in UTC. Append 'Z' to ensure browser parses it as UTC.
-    const date = new Date(dateStr.includes(' ') && !dateStr.includes('Z') ? dateStr.replace(' ', 'T') + 'Z' : dateStr);
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return { date: "N/A", time: "N/A" };
+    
+    const date = new Date(timestamp);
+    
     return {
       date: date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
       time: date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
     };
   };
 
+  if (isAuthReady && !user) {
+    return (
+      <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-emerald-500/30 relative">
+        <Background />
+        <Header />
+        <div className="max-w-4xl mx-auto px-6 py-32 relative z-10 flex flex-col items-center justify-center text-center">
+          <div className="w-20 h-20 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center mb-8">
+            <LogIn className="w-10 h-10 text-zinc-500" />
+          </div>
+          <h1 className="text-3xl font-bold mb-4">Sign in to view history</h1>
+          <p className="text-zinc-400 max-w-md mb-8">
+            Your analysis sessions are securely stored and linked to your account. Please sign in to access your history.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-emerald-500/30 relative">
       <Background />
       <Header />
       <div className="max-w-4xl mx-auto px-6 py-32 relative z-10">
-        <div className="flex items-center gap-4 mb-12">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <HistoryIcon className="w-6 h-6 text-emerald-400" />
+        <div className="flex items-center justify-between mb-12">
+          <div className="flex items-center gap-6">
+            <button 
+              onClick={() => navigate(-1)}
+              className="p-3 rounded-2xl bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 transition-all"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                <HistoryIcon className="w-6 h-6 text-emerald-400" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Analysis History</h1>
+                <p className="text-zinc-500 text-sm">Review your previous detection sessions</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Analysis History</h1>
-            <p className="text-zinc-500 text-sm">Review your previous detection sessions</p>
-          </div>
+          {sessions && sessions.length > 0 && (
+            <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-medium text-zinc-400">
+              {sessions.length} Sessions Saved
+            </div>
+          )}
         </div>
 
         {isLoading ? (
@@ -120,7 +157,7 @@ export default function History() {
               const { date, time } = formatDate(session.timestamp);
               const isTruth = session.verdict === "truth";
               const isExpanded = expandedSessionId === session.id;
-              const fullResults = isExpanded ? JSON.parse(session.fullResults) : null;
+              const fullResults = isExpanded ? session.analysisResults : null;
               
               return (
                 <motion.div
@@ -172,16 +209,16 @@ export default function History() {
                               <span>{session.recordingDuration || 0}s</span>
                             </div>
                             <div className="flex items-center gap-4 ml-2 border-l border-white/10 pl-4">
-                              <div className="flex items-center gap-2" title={`Facial Confidence: ${session.facialConfidence}%`}>
+                              <div className="flex items-center gap-2" title={`Facial Confidence: ${session.analysisResults?.facialConfidence || 0}%`}>
                                 <Shield className="w-3 h-3 text-emerald-500/70" />
                                 <div className="w-10 h-1 bg-zinc-800 rounded-full overflow-hidden">
-                                  <div className="h-full bg-emerald-500" style={{ width: `${session.facialConfidence}%` }} />
+                                  <div className="h-full bg-emerald-500" style={{ width: `${session.analysisResults?.facialConfidence || 0}%` }} />
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2" title={`Voice Stress Index: ${session.voiceScore}%`}>
+                              <div className="flex items-center gap-2" title={`Voice Stress Index: ${session.analysisResults?.voiceScore || 0}%`}>
                                 <Activity className="w-3 h-3 text-blue-500/70" />
                                 <div className="w-10 h-1 bg-zinc-800 rounded-full overflow-hidden">
-                                  <div className="h-full bg-blue-500" style={{ width: `${session.voiceScore}%` }} />
+                                  <div className="h-full bg-blue-500" style={{ width: `${session.analysisResults?.voiceScore || 0}%` }} />
                                 </div>
                               </div>
                             </div>
@@ -321,13 +358,23 @@ export default function History() {
                               <Brain className="w-4 h-4" />
                               <span className="text-[10px] font-bold uppercase tracking-widest">AI Analysis Summary</span>
                             </div>
-                            <p className="text-zinc-300 text-sm leading-relaxed italic relative z-10">
-                              "{session.aiAnalysis}"
-                            </p>
-                            <div className="mt-6 pt-6 border-t border-white/5 flex justify-end items-center">
+                            <div className="text-zinc-300 text-sm leading-relaxed italic relative z-10 markdown-body">
+                              <ReactMarkdown>{session.analysisResults?.aiAnalysis || ""}</ReactMarkdown>
+                            </div>
+                            <div className="mt-6 pt-6 border-t border-white/5 flex justify-between items-center">
+                              {session.videoUrl && (
+                                <a 
+                                  href={session.videoUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 hover:text-emerald-300 transition-colors"
+                                >
+                                  Download Session Video
+                                </a>
+                              )}
                               <button
                                 onClick={() => handleGoToResults(session)}
-                                className="px-6 py-2.5 rounded-xl bg-white text-black font-bold text-[10px] uppercase tracking-wider hover:bg-zinc-200 transition-all flex items-center gap-2"
+                                className="px-6 py-2.5 rounded-xl bg-white text-black font-bold text-[10px] uppercase tracking-wider hover:bg-zinc-200 transition-all flex items-center gap-2 ml-auto"
                               >
                                 View Full Report <ChevronRight className="w-4 h-4" />
                               </button>

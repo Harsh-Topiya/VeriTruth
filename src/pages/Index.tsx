@@ -24,7 +24,7 @@ export default function Index() {
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest mb-8">
-                <Zap className="w-3 h-3" /> Next-Gen Behavioral Intelligence
+                <Zap className="w-3 h-3" /> Next-Gen Deception Intelligence
               </div>
               <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/40">
                 Uncover Truth with <span className="text-emerald-500">Multimodal AI</span>
@@ -40,15 +40,13 @@ export default function Index() {
                   Begin New Session
                   <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                {analysisResults && (
-                  <Link 
-                    to="/results" 
-                    className="px-10 py-5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full text-lg font-bold hover:bg-emerald-500/20 transition-all active:scale-95 flex items-center gap-3"
-                  >
-                    <BarChart3 className="w-6 h-6" />
-                    Latest Results
-                  </Link>
-                )}
+                <Link 
+                  to="/results" 
+                  className="px-10 py-5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full text-lg font-bold hover:bg-emerald-500/20 transition-all active:scale-95 flex items-center gap-3"
+                >
+                  <BarChart3 className="w-6 h-6" />
+                  Latest Results
+                </Link>
                 <Link 
                   to="/history" 
                   className="px-10 py-5 bg-white/5 border border-white/10 backdrop-blur-md text-white rounded-full text-lg font-bold hover:bg-white/10 transition-all active:scale-95"
@@ -86,7 +84,7 @@ export default function Index() {
               {
                 icon: <Brain className="w-8 h-8 text-purple-500" />,
                 title: "Multimodal Fusion",
-                description: "Correlates data from multiple modalities to build a comprehensive behavioral profile with high confidence."
+                description: "Correlates data from multiple modalities to build a comprehensive deception profile with high confidence."
               }
             ].map((feature, i) => (
               <div key={i} className="p-8 bg-zinc-900/50 border border-zinc-800 rounded-3xl hover:border-emerald-500/50 transition-colors group">
@@ -110,9 +108,9 @@ export default function Index() {
               <div className="space-y-8">
                 {[
                   { title: "Record Response", description: "Enable your camera and microphone to record a short response to a specific question." },
-                  { title: "Behavioral Extraction", description: "Our AI extracts thousands of data points from your facial movements and vocal patterns." },
+                  { title: "Deception Extraction", description: "Our AI extracts thousands of data points from your facial movements and vocal patterns." },
                   { title: "Probabilistic Assessment", description: "Algorithms compare extracted patterns against known indicators of deceptive behavior." },
-                  { title: "Detailed Reporting", description: "Receive a comprehensive breakdown of confidence scores and specific behavioral markers." }
+                  { title: "Detailed Reporting", description: "Receive a comprehensive breakdown of confidence scores and specific deceptive markers." }
                 ].map((step, i) => (
                   <div key={i} className="flex gap-6">
                     <div className="flex-shrink-0 w-10 h-10 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center text-emerald-500 font-bold">
