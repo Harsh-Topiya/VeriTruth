@@ -13,6 +13,8 @@ interface AnalysisContextType {
   setAnalysisResults: (results: AnalysisResults | null) => void;
   isAnalyzing: boolean;
   setIsAnalyzing: (analyzing: boolean) => void;
+  sessionTitle: string;
+  setSessionTitle: (title: string) => void;
   user: User | null;
   isAuthReady: boolean;
 }
@@ -49,6 +51,7 @@ export const AnalysisProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [sessionTitle, setSessionTitle] = useState("");
   
   // Mock user for local storage state
   const [user] = useState<User | null>({ uid: "local-user", email: "guest@example.com" });
@@ -63,6 +66,8 @@ export const AnalysisProvider = ({ children }: { children: ReactNode }) => {
         setAnalysisResults,
         isAnalyzing,
         setIsAnalyzing,
+        sessionTitle,
+        setSessionTitle,
         user,
         isAuthReady,
       }}

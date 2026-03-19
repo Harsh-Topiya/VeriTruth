@@ -12,8 +12,13 @@ import { saveSession } from "../services/sessionService";
 
 export default function Analyze() {
   const navigate = useNavigate();
-  const { setRecordingData, setAnalysisResults, setIsAnalyzing, isAnalyzing, analysisResults, user } = useAnalysis();
+  const { setRecordingData, setAnalysisResults, setIsAnalyzing, isAnalyzing, analysisResults, user, sessionTitle, setSessionTitle } = useAnalysis();
   
+  // Clear session title on mount
+  useEffect(() => {
+    setSessionTitle("");
+  }, [setSessionTitle]);
+
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const recordingTimeRef = useRef(0);
@@ -211,8 +216,9 @@ export default function Analyze() {
       // Call Gemini API on the frontend
       const results = await analyzeVideo(videoBase64, recordingTimeRef.current, blob.type);
       
-      // Ensure recordingDuration is included in the results
+      // Ensure recordingDuration and title is included in the results
       results.recordingDuration = recordingTimeRef.current;
+      results.title = sessionTitle;
 
       setAnalysisResults(results);
       setIsAnalyzing(false);
@@ -220,7 +226,7 @@ export default function Analyze() {
 
       // Save results to Firebase in the background if user is logged in
       if (user) {
-        saveSession(results, blob)
+        saveSession(results, blob, sessionTitle)
           .then(sessionId => console.log("Session saved in background with ID:", sessionId))
           .catch(saveErr => console.error("Failed to save session in background:", saveErr));
       }
@@ -311,6 +317,21 @@ export default function Analyze() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Recording Area */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Session Title Input */}
+              <div className="p-6 bg-slate-900/40 border border-white/5 rounded-3xl">
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="session-title" className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Session Title</label>
+                  <input
+                    id="session-title"
+                    type="text"
+                    value={sessionTitle}
+                    onChange={(e) => setSessionTitle(e.target.value)}
+                    placeholder="Enter a title for this analysis (e.g., Interview with John)"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500/50 transition-colors placeholder:text-zinc-600"
+                  />
+                </div>
+              </div>
+
               <div className="relative aspect-video bg-slate-900/50 rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
                 <video 
                   ref={videoRef} 

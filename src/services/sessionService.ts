@@ -10,6 +10,7 @@ export interface SessionData {
   recordingDuration: number;
   analysisResults: AnalysisResults;
   videoUrl?: string;
+  title?: string;
 }
 
 const STORAGE_KEY = "truth_lens_sessions";
@@ -21,7 +22,8 @@ const notifyUpdate = () => {
 
 export const saveSession = async (
   results: AnalysisResults, 
-  videoBlob?: Blob | null
+  videoBlob?: Blob | null,
+  title?: string
 ) => {
   const sessions = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
   
@@ -36,6 +38,7 @@ export const saveSession = async (
     overallConfidence: results.overallConfidence,
     recordingDuration: results.recordingDuration || 0,
     analysisResults: results,
+    title: title || results.title || "Untitled Session",
   };
 
   sessions.unshift(sessionData);

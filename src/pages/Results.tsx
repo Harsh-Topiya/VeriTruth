@@ -176,6 +176,9 @@ export default function Results() {
               }`}
             >
               <div>
+                <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-2 block">
+                  {analysisResults.title || "Untitled Session"}
+                </span>
                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-2 block">Final Verdict</span>
                 <h2 className={`text-4xl font-black tracking-tighter uppercase ${
                   isInsufficient ? "text-amber-500" : isTruth ? "text-emerald-500" : "text-red-500"
@@ -485,6 +488,10 @@ export default function Results() {
                     <div className="flex-1 p-6 rounded-xl" style={{ backgroundColor: "#fafafa", border: "1px solid #e4e4e7" }}>
                       <h2 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "#71717a" }}>Session Metadata</h2>
                       <div className="space-y-3">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[10px] uppercase font-bold" style={{ color: "#71717a" }}>Title:</span>
+                          <span className="font-bold text-sm">{analysisResults?.title || "Untitled Session"}</span>
+                        </div>
                         <div className="flex flex-col gap-0.5">
                           <span className="text-[10px] uppercase font-bold" style={{ color: "#71717a" }}>Duration:</span>
                           <span className="font-bold text-sm">{analysisResults?.recordingDuration} Seconds</span>

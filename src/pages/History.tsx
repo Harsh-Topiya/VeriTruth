@@ -18,6 +18,7 @@ interface Session {
   recordingDuration: number;
   analysisResults: any;
   videoUrl?: string;
+  title?: string;
 }
 
 export default function History() {
@@ -184,6 +185,9 @@ export default function History() {
                         </div>
                         
                         <div>
+                          <h3 className="text-lg font-bold text-white mb-1">
+                            {session.title || "Untitled Session"}
+                          </h3>
                           <div className="flex items-center gap-3 mb-1">
                             <span className={`text-sm font-bold uppercase tracking-wider ${
                               isTruth ? "text-emerald-400" : "text-red-400"

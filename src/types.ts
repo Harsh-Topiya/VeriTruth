@@ -28,6 +28,7 @@ export interface AnalysisResults {
   }[];
   recordingDuration: number;
   aiAnalysis?: string;
+  title?: string;
 }
 
 export interface RecordingData {

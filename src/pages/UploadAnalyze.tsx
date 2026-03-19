@@ -1,4 +1,4 @@
-import { useState, useRef, ChangeEvent, DragEvent } from "react";
+import { useState, useRef, ChangeEvent, DragEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Upload, FileVideo, X, Brain, Shield, CheckCircle2, AlertCircle, Info, ArrowLeft, Play, Trash2, Loader2, BarChart3 } from "lucide-react";
 import { useAnalysis } from "../context/AnalysisContext";
@@ -12,8 +12,13 @@ import { saveSession } from "../services/sessionService";
 
 export default function UploadAnalyze() {
   const navigate = useNavigate();
-  const { setAnalysisResults, setIsAnalyzing, isAnalyzing, analysisResults, user } = useAnalysis();
+  const { setAnalysisResults, setIsAnalyzing, isAnalyzing, analysisResults, user, sessionTitle, setSessionTitle } = useAnalysis();
   
+  // Clear session title on mount
+  useEffect(() => {
+    setSessionTitle("");
+  }, [setSessionTitle]);
+
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -93,6 +98,7 @@ export default function UploadAnalyze() {
 
       const results = await analyzeVideo(videoBase64, duration, file.type);
       results.recordingDuration = duration;
+      results.title = sessionTitle;
 
       setAnalysisResults(results);
       setIsAnalyzing(false);
@@ -100,7 +106,7 @@ export default function UploadAnalyze() {
 
       // Save results in the background if user is logged in
       if (user) {
-        saveSession(results, file)
+        saveSession(results, file, sessionTitle)
           .then(sessionId => console.log("Session saved in background with ID:", sessionId))
           .catch(saveErr => console.error("Failed to save session in background:", saveErr));
       }
@@ -186,6 +192,21 @@ export default function UploadAnalyze() {
               <div className="flex flex-col gap-2">
                 <h1 className="text-4xl font-black tracking-tighter">Upload Analysis</h1>
                 <p className="text-zinc-500 text-sm">Analyze pre-recorded video files for deceptive patterns</p>
+              </div>
+
+              {/* Session Title Input */}
+              <div className="p-6 bg-slate-900/40 border border-white/5 rounded-3xl">
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="session-title" className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Session Title</label>
+                  <input
+                    id="session-title"
+                    type="text"
+                    value={sessionTitle}
+                    onChange={(e) => setSessionTitle(e.target.value)}
+                    placeholder="Enter a title for this analysis (e.g., Interview with John)"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500/50 transition-colors placeholder:text-zinc-600"
+                  />
+                </div>
               </div>
 
               <div className="relative aspect-video bg-slate-900/40 border-2 border-dashed border-white/10 rounded-[40px] overflow-hidden flex flex-col items-center justify-center group transition-all hover:border-emerald-500/30">
