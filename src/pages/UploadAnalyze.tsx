@@ -130,15 +130,12 @@ export default function UploadAnalyze() {
         fusionScore: fusion,
         facialConfidence: randomScore(70, 90),
         speechClarity: randomScore(75, 95),
-        eyeContact: randomScore(60, 90),
         facialFeatures: [
           { feature: "Blink Rate", value: randomScore(70, 95), fullMark: 100, details: "Blink frequency within normal parameters" },
           { feature: "Micro-expressions", value: randomScore(60, 90), fullMark: 100, details: "Subtle micro-expressions analyzed" },
-          { feature: "Eye Contact", value: randomScore(60, 90), fullMark: 100, details: "Eye contact patterns evaluated" },
           { feature: "Lip Tension", value: randomScore(70, 95), fullMark: 100, details: "Lip muscle tension levels" },
           { feature: "Brow Movement", value: randomScore(70, 90), fullMark: 100, details: "Brow movement symmetry" },
-          { feature: "Facial Symmetry", value: randomScore(80, 95), fullMark: 100, details: "Structural facial symmetry" },
-          { feature: "Facial Confidence", value: randomScore(70, 90), fullMark: 100, details: "Overall facial muscle relaxation" }
+          { feature: "Facial Symmetry", value: randomScore(80, 95), fullMark: 100, details: "Structural facial symmetry" }
         ],
         voiceFeatures: [
           { feature: "Pitch Variance", value: randomScore(70, 90), details: "Vocal pitch modulation analysis" },
@@ -146,8 +143,7 @@ export default function UploadAnalyze() {
           { feature: "Pause Patterns", value: randomScore(75, 95), details: "Inter-word pause analysis" },
           { feature: "Voice Tremor", value: randomScore(85, 98), details: "Micro-tremor detection" },
           { feature: "MFCC Score", value: randomScore(75, 90), details: "Spectral envelope analysis" },
-          { feature: "Jitter", value: randomScore(80, 95), details: "Frequency perturbation levels" },
-          { feature: "Speech Clarity", value: randomScore(85, 98), details: "Articulation clarity score" }
+          { feature: "Jitter", value: randomScore(80, 95), details: "Frequency perturbation levels" }
         ],
         timelineData: Array.from({ length: 10 }, (_, i) => ({
           time: `${i * 5}s`,

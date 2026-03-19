@@ -3,12 +3,11 @@ export interface AnalysisResults {
   status?: "complete" | "incomplete";
   missingFeature?: "visual" | "voice" | "both";
   overallConfidence: number;
+  facialConfidence: number;
+  speechClarity: number;
   facialScore: number;
   voiceScore: number;
   fusionScore: number;
-  facialConfidence: number;
-  speechClarity: number;
-  eyeContact: number;
   facialFeatures: {
     feature: string;
     value: number;

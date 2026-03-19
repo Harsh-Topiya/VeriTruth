@@ -20,8 +20,8 @@ ANALYSIS PARAMETERS (0-100):
 - 60-100: Strong indicators of truthfulness
 - Use precise, non-rounded values (e.g., 73, 89, 42).
 
-FACIAL INDICATORS: Blink Rate, Micro-expressions, Eye Contact, Lip Tension, Brow Movement, Facial Symmetry, Facial Confidence.
-VOICE INDICATORS: Pitch Variance, Speech Rate, Pause Patterns, Voice Tremor, MFCC Score, Jitter, Speech Clarity.
+FACIAL INDICATORS: Blink Rate, Micro-expressions, Lip Tension, Brow Movement, Facial Symmetry.
+VOICE INDICATORS: Pitch Variance, Speech Rate, Pause Patterns, Voice Tremor, MFCC Score, Jitter.
 
 VERDICT DETERMINATION:
 - Fusion Score = (Facial Score × 0.55) + (Voice Score × 0.45)

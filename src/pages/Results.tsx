@@ -64,18 +64,56 @@ export default function Results() {
   const downloadPDF = async () => {
     if (!reportRef.current) return;
     
-    const canvas = await html2canvas(reportRef.current, {
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = 210;
+    const pdfHeight = 297;
+    
+    const container = reportRef.current;
+    
+    const canvasOptions = {
       scale: 2,
       useCORS: true,
-      backgroundColor: "#ffffff"
-    });
+      backgroundColor: "#ffffff",
+      logging: false,
+      imageTimeout: 0,
+      windowWidth: 800,
+      onclone: (clonedDoc: Document) => {
+        const reportEl = clonedDoc.querySelector('[data-report-container="true"]');
+        if (reportEl instanceof HTMLElement) {
+          reportEl.style.width = "794px"; // A4 width at 96dpi
+          reportEl.style.maxWidth = "none";
+          // Preserve exact padding from the original
+          reportEl.style.paddingTop = "4mm";
+          reportEl.style.paddingBottom = "10mm";
+          reportEl.style.paddingLeft = "12mm";
+          reportEl.style.paddingRight = "12mm";
+        }
+      }
+    };
+
+    const canvas = await html2canvas(container, canvasOptions);
+    const imgData = canvas.toDataURL("image/png", 1.0);
     
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    const imgWidth = pdfWidth;
+    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
     
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    let heightLeft = imgHeight;
+    let position = 0;
+    let pageNumber = 1;
+
+    // Add the first page
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "FAST");
+    heightLeft -= pdfHeight;
+
+    // Add subsequent pages if content is longer than one page
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight; // This moves the image up for the next page
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "FAST");
+      heightLeft -= pdfHeight;
+      pageNumber++;
+    }
+    
     pdf.save(`veritruth_report_${new Date().getTime()}.pdf`);
     setShowPreview(false);
   };
@@ -223,6 +261,89 @@ export default function Results() {
             </motion.div>
           </div>
 
+          {/* Core Modality Metrics */}
+          {!isInsufficient && (
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 }}
+                className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-3xl flex items-center justify-between group relative cursor-help"
+                title={`Facial Confidence: ${analysisResults.facialConfidence}%`}
+              >
+                <div className="flex-1">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500/60 mb-2 block">Facial Confidence</span>
+                  <div className="flex items-center gap-4">
+                    <h2 className="text-4xl font-black tracking-tighter text-emerald-400">{analysisResults.facialConfidence}%</h2>
+                    <div className="flex-1 h-1.5 bg-emerald-500/10 rounded-full overflow-hidden max-w-[100px]">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${analysisResults.facialConfidence}%` }}
+                        transition={{ duration: 1, delay: 0.5 }}
+                        className="h-full bg-emerald-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                  <Smile className="w-6 h-6 text-emerald-400" />
+                </div>
+              </motion.div>
+
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+                className="p-6 bg-blue-500/5 border border-blue-500/20 rounded-3xl flex items-center justify-between group relative cursor-help"
+                title={`Speech Clarity: ${analysisResults.speechClarity}%`}
+              >
+                <div className="flex-1">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500/60 mb-2 block">Speech Clarity</span>
+                  <div className="flex items-center gap-4">
+                    <h2 className="text-4xl font-black tracking-tighter text-blue-400">{analysisResults.speechClarity}%</h2>
+                    <div className="flex-1 h-1.5 bg-blue-500/10 rounded-full overflow-hidden max-w-[100px]">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${analysisResults.speechClarity}%` }}
+                        transition={{ duration: 1, delay: 0.6 }}
+                        className="h-full bg-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                  <Mic className="w-6 h-6 text-blue-400" />
+                </div>
+              </motion.div>
+
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+                className="p-6 bg-indigo-500/5 border border-indigo-500/20 rounded-3xl flex items-center justify-between group relative cursor-help"
+                title={`Voice Stress Index: ${analysisResults.voiceScore}%`}
+              >
+                <div className="flex-1">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-500/60 mb-2 block">Voice Stress Index</span>
+                  <div className="flex items-center gap-4">
+                    <h2 className="text-4xl font-black tracking-tighter text-indigo-400">{analysisResults.voiceScore}%</h2>
+                    <div className="flex-1 h-1.5 bg-indigo-500/10 rounded-full overflow-hidden max-w-[100px]">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${analysisResults.voiceScore}%` }}
+                        transition={{ duration: 1, delay: 0.7 }}
+                        className="h-full bg-indigo-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+                  <Activity className="w-6 h-6 text-indigo-400" />
+                </div>
+              </motion.div>
+            </div>
+          )}
+
           {/* Charts Grid */}
           {!isInsufficient && (
             <div className="grid lg:grid-cols-1 gap-8 mb-8">
@@ -303,13 +424,9 @@ export default function Results() {
                     <div className="w-1 h-6 bg-emerald-500 rounded-full" />
                     <h3 className="text-lg font-black uppercase tracking-tighter">Facial Indicators</h3>
                   </div>
-                  <div className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mr-2">Facial Confidence:</span>
-                    <span className="text-sm font-black text-emerald-400">{analysisResults.facialConfidence}%</span>
-                  </div>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                  {analysisResults.facialFeatures.map((f, i) => (
+                  {analysisResults.facialFeatures.filter(f => f.feature !== "Facial Confidence" && f.feature !== "Eye Contact").map((f, i) => (
                     <MetricGauge 
                       key={i}
                       label={f.feature} 
@@ -337,13 +454,9 @@ export default function Results() {
                     <div className="w-1 h-6 bg-blue-500 rounded-full" />
                     <h3 className="text-lg font-black uppercase tracking-tighter">Vocal Indicators</h3>
                   </div>
-                  <div className="px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400 mr-2">Speech Clarity:</span>
-                    <span className="text-sm font-black text-blue-400">{analysisResults.speechClarity}%</span>
-                  </div>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                  {analysisResults.voiceFeatures.map((f, i) => (
+                  {analysisResults.voiceFeatures.filter(f => f.feature !== "Speech Clarity").map((f, i) => (
                     <MetricGauge 
                       key={i}
                       label={f.feature} 
@@ -380,17 +493,6 @@ export default function Results() {
               <div className="prose prose-invert max-w-none">
                 <div className="text-lg text-zinc-300 leading-relaxed font-medium markdown-body">
                   <ReactMarkdown>{analysisResults.aiAnalysis}</ReactMarkdown>
-                </div>
-              </div>
-              <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-emerald-500" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold">VeriTruth Core v4.2</p>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Neural Deception Engine</p>
-                  </div>
                 </div>
               </div>
             </div>
@@ -452,129 +554,117 @@ export default function Results() {
               <div className="flex-grow overflow-y-auto p-8 bg-zinc-800/50">
                 <div 
                   ref={reportRef}
-                  className="w-full max-w-[210mm] mx-auto p-[20mm] shadow-xl min-h-[297mm] font-serif"
+                  data-report-container="true"
+                  className="w-full max-w-[210mm] mx-auto pt-[4mm] pb-[10mm] px-[12mm] shadow-xl font-serif"
                   style={{ backgroundColor: "#ffffff", color: "#000000" }}
                 >
-                  <div className="flex justify-between items-end pb-8 mb-12" style={{ borderBottom: "2px solid #18181b" }}>
+                  <div className="flex justify-between items-end pb-2 mb-4" style={{ borderBottom: "2px solid #18181b" }}>
                     <div>
-                      <div className="flex items-center gap-3">
-                        <Shield className="w-10 h-10" style={{ color: "#059669" }} />
+                      <div className="flex items-center gap-2">
+                        <Shield className="w-8 h-8" style={{ color: "#059669" }} />
                         <div>
-                          <h1 className="text-4xl font-black tracking-tighter leading-none">VERITRUTH</h1>
-                          <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1" style={{ color: "#71717a" }}>AI DECEPTION ANALYSIS</p>
+                          <h1 className="text-3xl font-black tracking-tighter leading-none">VERITRUTH</h1>
+                          <p className="text-[9px] font-bold uppercase tracking-[0.2em] mt-1" style={{ color: "#71717a" }}>AI DECEPTION ANALYSIS</p>
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: "#71717a" }}>Report Generated</p>
-                      <p className="text-xs font-bold">{new Date().toLocaleDateString()} | {new Date().toLocaleTimeString()}</p>
+                      <p className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: "#71717a" }}>Report Generated</p>
+                      <p className="text-[10px] font-bold">{new Date().toLocaleDateString()} | {new Date().toLocaleTimeString()}</p>
                     </div>
                   </div>
 
-                  <div className="flex gap-8 mb-12">
-                    <div className="flex-[2] p-6 rounded-xl" style={{ backgroundColor: "#fafafa", border: "1px solid #e4e4e7" }}>
-                      <h2 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "#71717a" }}>Subject Assessment</h2>
-                      <div className="flex items-center gap-6">
-                        <div className={`font-black uppercase tracking-tighter ${analysisResults?.verdict === 'insufficient_data' ? 'text-2xl' : 'text-4xl'}`} style={{ color: analysisResults?.verdict === 'truth' ? '#059669' : analysisResults?.verdict === 'insufficient_data' ? '#d97706' : '#dc2626' }}>
-                          {analysisResults?.verdict === 'insufficient_data' ? 'Insufficient Data' : analysisResults?.verdict}
-                        </div>
-                        <div className="h-10 w-px" style={{ backgroundColor: "#e4e4e7" }} />
-                        <div className="flex flex-col">
-                          <p className="text-2xl font-black leading-none mb-1">{analysisResults?.overallConfidence}%</p>
-                          <p className="text-[10px] font-bold uppercase whitespace-nowrap" style={{ color: "#71717a" }}>Confidence Score</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex-1 p-6 rounded-xl" style={{ backgroundColor: "#fafafa", border: "1px solid #e4e4e7" }}>
-                      <h2 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "#71717a" }}>Session Metadata</h2>
-                      <div className="space-y-3">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] uppercase font-bold" style={{ color: "#71717a" }}>Title:</span>
-                          <span className="font-bold text-sm">{analysisResults?.title || "Untitled Session"}</span>
-                        </div>
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] uppercase font-bold" style={{ color: "#71717a" }}>Duration:</span>
-                          <span className="font-bold text-sm">{analysisResults?.recordingDuration} Seconds</span>
-                        </div>
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] uppercase font-bold" style={{ color: "#71717a" }}>Modality:</span>
-                          <span className="font-bold text-sm">Multimodal Fusion</span>
-                        </div>
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] uppercase font-bold" style={{ color: "#71717a" }}>Engine:</span>
-                          <span className="font-bold text-sm">VeriTruth Core v4.2</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mb-12">
-                    <h2 className="text-sm font-bold uppercase tracking-widest pb-2 mb-6" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>Core Deception Metrics</h2>
-                    <div className="grid grid-cols-3 gap-6">
-                      <div className="p-4 rounded-xl text-center" style={{ backgroundColor: "#f9fafb", border: "1px solid #f3f4f6" }}>
-                        <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "#6b7280" }}>Facial Confidence</p>
-                        <p className="text-2xl font-black">{analysisResults?.facialConfidence}%</p>
-                      </div>
-                      <div className="p-4 rounded-xl text-center" style={{ backgroundColor: "#f9fafb", border: "1px solid #f3f4f6" }}>
-                        <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "#6b7280" }}>Speech Clarity</p>
-                        <p className="text-2xl font-black">{analysisResults?.speechClarity}%</p>
-                      </div>
-                      <div className="p-4 rounded-xl text-center" style={{ backgroundColor: "#f9fafb", border: "1px solid #f3f4f6" }}>
-                        <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "#6b7280" }}>Eye Contact</p>
-                        <p className="text-2xl font-black">{analysisResults?.eyeContact}%</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mb-12">
-                    <h2 className="text-sm font-bold uppercase tracking-widest pb-2 mb-6" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>Detailed AI Deception Summary</h2>
-                    <div className="text-base leading-relaxed markdown-body-pdf" style={{ color: "#27272a" }}>
-                      <ReactMarkdown>{analysisResults?.aiAnalysis}</ReactMarkdown>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-12 mb-12">
-                    <div>
-                      <h2 className="text-sm font-bold uppercase tracking-widest pb-2 mb-6" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>Facial Indicators</h2>
-                      <div className="space-y-4">
-                        {analysisResults?.facialFeatures.map((f, i) => (
-                          <div key={i}>
-                            <div className="flex justify-between text-xs font-bold mb-1">
-                              <span>{f.feature}</span>
-                              <span>{f.value}%</span>
-                            </div>
-                            <div className="h-1 rounded-full overflow-hidden" style={{ backgroundColor: "#f4f4f5" }}>
-                              <div className="h-full" style={{ width: `${f.value}%`, backgroundColor: "#059669" }} />
-                            </div>
+                    <div className="flex gap-4 mb-4">
+                      <div className="flex-[2] p-3.5 rounded-xl" style={{ backgroundColor: "#fafafa", border: "1px solid #e4e4e7" }}>
+                        <h2 className="text-[9px] font-bold uppercase tracking-widest mb-1.5 leading-normal" style={{ color: "#71717a" }}>Subject Assessment</h2>
+                        <div className="flex items-center gap-3">
+                          <div className={`font-black uppercase ${analysisResults?.verdict === 'insufficient_data' ? 'text-lg' : 'text-2xl'}`} style={{ color: analysisResults?.verdict === 'truth' ? '#059669' : analysisResults?.verdict === 'insufficient_data' ? '#d97706' : '#dc2626' }}>
+                            {analysisResults?.verdict === 'insufficient_data' ? 'Insufficient Data' : analysisResults?.verdict}
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <h2 className="text-sm font-bold uppercase tracking-widest pb-2 mb-6" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>Vocal Indicators</h2>
-                      <div className="space-y-4">
-                        {analysisResults?.voiceFeatures.map((f, i) => (
-                          <div key={i}>
-                            <div className="flex justify-between text-xs font-bold mb-1">
-                              <span>{f.feature}</span>
-                              <span>{f.value}%</span>
-                            </div>
-                            <div className="h-1 rounded-full overflow-hidden" style={{ backgroundColor: "#f4f4f5" }}>
-                              <div className="h-full" style={{ width: `${f.value}%`, backgroundColor: "#2563eb" }} />
-                            </div>
+                          <div className="h-5 w-px" style={{ backgroundColor: "#e4e4e7" }} />
+                          <div className="flex flex-col gap-1">
+                            <p className="text-lg font-black leading-tight">{analysisResults?.overallConfidence}%</p>
+                            <p className="text-[7px] font-bold uppercase whitespace-nowrap" style={{ color: "#71717a" }}>Confidence Score</p>
                           </div>
-                        ))}
+                        </div>
+                      </div>
+                      <div className="flex-1 p-3.5 rounded-xl" style={{ backgroundColor: "#fafafa", border: "1px solid #e4e4e7" }}>
+                        <div className="space-y-2">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[7px] uppercase font-bold" style={{ color: "#71717a" }}>Title:</span>
+                            <span className="font-bold text-[9px] break-words leading-normal">{analysisResults?.title || "Untitled Session"}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[7px] uppercase font-bold" style={{ color: "#71717a" }}>Duration:</span>
+                            <span className="font-bold text-[9px]">{analysisResults?.recordingDuration} Seconds</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="mt-auto pt-12 text-center" style={{ borderTop: "1px solid #e4e4e7" }}>
-                    <p className="text-[10px] font-bold tracking-[0.3em] uppercase" style={{ color: "#a1a1aa" }}>
-                      Confidential Analysis Report • Generated by VeriTruth AI
-                    </p>
+                    <div className="mb-4">
+                      <h2 className="text-[9px] font-bold uppercase tracking-widest pb-0.5 mb-2 leading-normal" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>Core Deception Metrics</h2>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="p-3 rounded-xl text-center" style={{ backgroundColor: "#f9fafb", border: "1px solid #f3f4f6" }}>
+                          <p className="text-[7px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "#6b7280" }}>Facial Confidence</p>
+                          <p className="text-base font-black">{analysisResults?.facialConfidence || 0}%</p>
+                        </div>
+                        <div className="p-3 rounded-xl text-center" style={{ backgroundColor: "#f9fafb", border: "1px solid #f3f4f6" }}>
+                          <p className="text-[7px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "#6b7280" }}>Speech Clarity</p>
+                          <p className="text-base font-black">{analysisResults?.speechClarity || 0}%</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <h2 className="text-[9px] font-bold uppercase tracking-widest pb-0.5 mb-2 leading-normal" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>Detailed AI Deception Summary</h2>
+                      <div className="text-[10px] leading-relaxed markdown-body-pdf" style={{ color: "#27272a" }}>
+                        <ReactMarkdown>{analysisResults?.aiAnalysis}</ReactMarkdown>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <h2 className="text-[9px] font-bold uppercase tracking-widest pb-0.5 mb-2 leading-normal" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>Facial Indicators</h2>
+                        <div className="space-y-3">
+                          {analysisResults?.facialFeatures.filter(f => f.feature !== "Facial Confidence" && f.feature !== "Eye Contact").map((f, i) => (
+                            <div key={i}>
+                              <div className="flex justify-between text-[8px] font-bold mb-1 leading-normal">
+                                <span>{f.feature}</span>
+                                <span>{f.value}%</span>
+                              </div>
+                              <div className="h-1 rounded-full overflow-hidden" style={{ backgroundColor: "#f4f4f5" }}>
+                                <div className="h-full" style={{ width: `${f.value}%`, backgroundColor: "#059669" }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <h2 className="text-[9px] font-bold uppercase tracking-widest pb-0.5 mb-2 leading-normal" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>Vocal Indicators</h2>
+                        <div className="space-y-3">
+                          {analysisResults?.voiceFeatures.filter(f => f.feature !== "Speech Clarity").map((f, i) => (
+                            <div key={i}>
+                              <div className="flex justify-between text-[8px] font-bold mb-1 leading-normal">
+                                <span>{f.feature}</span>
+                                <span>{f.value}%</span>
+                              </div>
+                              <div className="h-1 rounded-full overflow-hidden" style={{ backgroundColor: "#f4f4f5" }}>
+                                <div className="h-full" style={{ width: `${f.value}%`, backgroundColor: "#2563eb" }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto pt-4 text-center" style={{ borderTop: "1px solid #e4e4e7" }}>
+                      <p className="text-[8px] font-bold tracking-[0.3em] uppercase" style={{ color: "#a1a1aa" }}>
+                        Confidential Analysis Report • Generated by VeriTruth AI
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
             </motion.div>
           </div>
         )}

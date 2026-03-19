@@ -21,8 +21,6 @@ db.exec(`
     facialScore REAL,
     voiceScore REAL,
     fusionScore REAL,
-    facialConfidence REAL,
-    speechClarity REAL,
     eyeContact REAL,
     recordingDuration REAL,
     aiAnalysis TEXT,
@@ -31,12 +29,6 @@ db.exec(`
 `);
 
 // Ensure new columns exist for existing databases
-try {
-  db.exec("ALTER TABLE sessions ADD COLUMN facialConfidence REAL");
-} catch (e) {}
-try {
-  db.exec("ALTER TABLE sessions ADD COLUMN speechClarity REAL");
-} catch (e) {}
 try {
   db.exec("ALTER TABLE sessions ADD COLUMN eyeContact REAL");
 } catch (e) {}
@@ -56,8 +48,8 @@ app.post("/api/sessions/save", (req, res) => {
     const results = req.body;
     
     const stmt = db.prepare(`
-      INSERT INTO sessions (verdict, overallConfidence, facialScore, voiceScore, fusionScore, facialConfidence, speechClarity, eyeContact, recordingDuration, aiAnalysis, fullResults)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO sessions (verdict, overallConfidence, facialScore, voiceScore, fusionScore, eyeContact, recordingDuration, aiAnalysis, fullResults)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     
     stmt.run(
@@ -66,8 +58,6 @@ app.post("/api/sessions/save", (req, res) => {
       results.facialScore,
       results.voiceScore,
       results.fusionScore,
-      results.facialConfidence,
-      results.speechClarity,
       results.eyeContact,
       results.recordingDuration,
       results.aiAnalysis,
@@ -84,7 +74,7 @@ app.post("/api/sessions/save", (req, res) => {
 // History Endpoints
 app.get("/api/sessions", (req, res) => {
   try {
-    const sessions = db.prepare("SELECT id, strftime('%Y-%m-%dT%H:%M:%SZ', timestamp) as timestamp, verdict, overallConfidence, facialScore, voiceScore, fusionScore, facialConfidence, speechClarity, eyeContact, recordingDuration, aiAnalysis, fullResults FROM sessions ORDER BY timestamp DESC").all();
+    const sessions = db.prepare("SELECT id, strftime('%Y-%m-%dT%H:%M:%SZ', timestamp) as timestamp, verdict, overallConfidence, facialScore, voiceScore, fusionScore, eyeContact, recordingDuration, aiAnalysis, fullResults FROM sessions ORDER BY timestamp DESC").all();
     res.json(sessions);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch sessions" });
@@ -93,7 +83,7 @@ app.get("/api/sessions", (req, res) => {
 
 app.get("/api/sessions/:id", (req, res) => {
   try {
-    const session = db.prepare("SELECT id, strftime('%Y-%m-%dT%H:%M:%SZ', timestamp) as timestamp, verdict, overallConfidence, facialScore, voiceScore, fusionScore, facialConfidence, speechClarity, eyeContact, recordingDuration, aiAnalysis, fullResults FROM sessions WHERE id = ?").get(req.params.id);
+    const session = db.prepare("SELECT id, strftime('%Y-%m-%dT%H:%M:%SZ', timestamp) as timestamp, verdict, overallConfidence, facialScore, voiceScore, fusionScore, eyeContact, recordingDuration, aiAnalysis, fullResults FROM sessions WHERE id = ?").get(req.params.id);
     if (!session) {
       return res.status(404).json({ error: "Session not found" });
     }

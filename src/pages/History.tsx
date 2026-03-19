@@ -212,20 +212,6 @@ export default function History() {
                               <div className="w-1 h-1 rounded-full bg-zinc-700" />
                               <span>{session.recordingDuration || 0}s</span>
                             </div>
-                            <div className="flex items-center gap-4 ml-2 border-l border-white/10 pl-4">
-                              <div className="flex items-center gap-2" title={`Facial Confidence: ${session.analysisResults?.facialConfidence || 0}%`}>
-                                <Shield className="w-3 h-3 text-emerald-500/70" />
-                                <div className="w-10 h-1 bg-zinc-800 rounded-full overflow-hidden">
-                                  <div className="h-full bg-emerald-500" style={{ width: `${session.analysisResults?.facialConfidence || 0}%` }} />
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2" title={`Voice Stress Index: ${session.analysisResults?.voiceScore || 0}%`}>
-                                <Activity className="w-3 h-3 text-blue-500/70" />
-                                <div className="w-10 h-1 bg-zinc-800 rounded-full overflow-hidden">
-                                  <div className="h-full bg-blue-500" style={{ width: `${session.analysisResults?.voiceScore || 0}%` }} />
-                                </div>
-                              </div>
-                            </div>
                           </div>
                         </div>
                       </div>
