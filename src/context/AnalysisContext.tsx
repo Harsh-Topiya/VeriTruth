@@ -27,9 +27,9 @@ export const AnalysisProvider = ({ children }: { children: ReactNode }) => {
     audioBlob: null,
   });
   
-  // Initialize from localStorage
+  // Initialize from sessionStorage
   const [analysisResults, setAnalysisResultsState] = useState<AnalysisResults | null>(() => {
-    const saved = localStorage.getItem("veritruth_latest_results");
+    const saved = sessionStorage.getItem("veritruth_latest_results");
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -44,9 +44,9 @@ export const AnalysisProvider = ({ children }: { children: ReactNode }) => {
   const setAnalysisResults = (results: AnalysisResults | null) => {
     setAnalysisResultsState(results);
     if (results) {
-      localStorage.setItem("veritruth_latest_results", JSON.stringify(results));
+      sessionStorage.setItem("veritruth_latest_results", JSON.stringify(results));
     } else {
-      localStorage.removeItem("veritruth_latest_results");
+      sessionStorage.removeItem("veritruth_latest_results");
     }
   };
 

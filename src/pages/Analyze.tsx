@@ -556,18 +556,6 @@ export default function Analyze() {
                     <div className="space-y-4">
                       <div className="bg-black/20 p-3 rounded-xl border border-white/5">
                         <div className="flex items-center justify-between gap-4 mb-2">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Stress Index</span>
-                          <span className="text-xs font-mono text-emerald-400">{hudMetrics.stress}%</span>
-                        </div>
-                        <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                          <motion.div 
-                            animate={{ width: `${hudMetrics.stress}%` }}
-                            className="h-full bg-emerald-500" 
-                          />
-                        </div>
-                      </div>
-                      <div className="bg-black/20 p-3 rounded-xl border border-white/5">
-                        <div className="flex items-center justify-between gap-4 mb-2">
                           <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Micro-Expressions</span>
                           <span className="text-xs font-mono text-yellow-400">{hudMetrics.micro}</span>
                         </div>
@@ -575,6 +563,19 @@ export default function Analyze() {
                           <motion.div 
                             animate={{ width: `${(hudMetrics.micro / 20) * 100}%` }}
                             className="h-full bg-yellow-500" 
+                          />
+                        </div>
+                      </div>
+
+                      <div className="bg-black/20 p-3 rounded-xl border border-white/5">
+                        <div className="flex items-center justify-between gap-4 mb-2">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Voice Stress Index</span>
+                          <span className="text-xs font-mono text-indigo-400">{hudMetrics.stress}%</span>
+                        </div>
+                        <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                          <motion.div 
+                            animate={{ width: `${hudMetrics.stress}%` }}
+                            className="h-full bg-indigo-500" 
                           />
                         </div>
                       </div>

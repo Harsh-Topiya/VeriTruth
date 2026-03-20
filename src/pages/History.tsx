@@ -319,7 +319,7 @@ export default function History() {
                               <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400">Vocal Indicators</h4>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                              {fullResults?.voiceFeatures?.map((f: any, i: number) => (
+                              {fullResults?.voiceFeatures?.filter((f: any) => f.feature !== "Voice Stress Index").map((f: any, i: number) => (
                                 <MetricGauge 
                                   key={i}
                                   label={f.feature} 

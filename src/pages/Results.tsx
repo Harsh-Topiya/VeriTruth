@@ -263,7 +263,7 @@ export default function Results() {
 
           {/* Core Modality Metrics */}
           {!isInsufficient && (
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -313,32 +313,6 @@ export default function Results() {
                 </div>
                 <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center">
                   <Mic className="w-6 h-6 text-blue-400" />
-                </div>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 }}
-                className="p-6 bg-indigo-500/5 border border-indigo-500/20 rounded-3xl flex items-center justify-between group relative cursor-help"
-                title={`Voice Stress Index: ${analysisResults.voiceScore}%`}
-              >
-                <div className="flex-1">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-500/60 mb-2 block">Voice Stress Index</span>
-                  <div className="flex items-center gap-4">
-                    <h2 className="text-4xl font-black tracking-tighter text-indigo-400">{analysisResults.voiceScore}%</h2>
-                    <div className="flex-1 h-1.5 bg-indigo-500/10 rounded-full overflow-hidden max-w-[100px]">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${analysisResults.voiceScore}%` }}
-                        transition={{ duration: 1, delay: 0.7 }}
-                        className="h-full bg-indigo-500"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
-                  <Activity className="w-6 h-6 text-indigo-400" />
                 </div>
               </motion.div>
             </div>
@@ -456,7 +430,7 @@ export default function Results() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                  {analysisResults.voiceFeatures.filter(f => f.feature !== "Speech Clarity").map((f, i) => (
+                  {analysisResults.voiceFeatures.filter(f => f.feature !== "Speech Clarity" && f.feature !== "Voice Stress Index").map((f, i) => (
                     <MetricGauge 
                       key={i}
                       label={f.feature} 
