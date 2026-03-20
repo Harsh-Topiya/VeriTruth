@@ -270,6 +270,13 @@ export default function Analyze() {
           voice: randomScore(70, 95),
           combined: randomScore(70, 95)
         })),
+        segments: [
+          { startTime: 0, endTime: 4, verdict: "truth", confidence: randomScore(80, 95) },
+          { startTime: 4, endTime: 10, verdict: "deception", confidence: randomScore(40, 60) },
+          { startTime: 10, endTime: recordingTimeRef.current, verdict: "truth", confidence: randomScore(85, 98) }
+        ],
+        truthPercentage: 65,
+        deceptionPercentage: 35,
         recordingDuration: recordingTimeRef.current,
         aiAnalysis: "Analysis Summary: The deception patterns observed during this session show a specific cluster of indicators. Facial analysis suggests a high degree of control over micro-expressions, while vocal stress patterns remain within baseline variations for the subject. The fusion of visual and auditory data points to a consistent narrative delivery. Further observation of eye contact and blink rate confirms the initial assessment. The overall deception baseline was established during calibration and used as a reference for these findings."
       };

@@ -157,6 +157,13 @@ export default function History() {
             {sessions?.map((session, index) => {
               const { date, time } = formatDate(session.timestamp);
               const isTruth = session.verdict === "truth";
+              const isInsufficient = session.verdict === "insufficient_data";
+              
+              // Determine if it's mixed indicators
+              const showSingleVerdict = !session.analysisResults?.segments || session.analysisResults.segments.length <= 1 || 
+                session.analysisResults.segments.every((s: any) => s.verdict === session.analysisResults.segments[0].verdict);
+              const isMixed = !isInsufficient && !showSingleVerdict;
+              
               const isExpanded = expandedSessionId === session.id;
               const fullResults = isExpanded ? session.analysisResults : null;
               
@@ -177,11 +184,13 @@ export default function History() {
                     <div className="flex items-center justify-between gap-6">
                       <div className="flex items-center gap-6">
                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border ${
-                          isTruth 
-                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
-                            : "bg-red-500/10 border-red-500/20 text-red-400"
+                          isInsufficient || isMixed
+                            ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                            : isTruth 
+                              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
+                              : "bg-red-500/10 border-red-500/20 text-red-400"
                         }`}>
-                          {isTruth ? <CheckCircle2 className="w-7 h-7" /> : <Shield className="w-7 h-7" />}
+                          {isInsufficient || isMixed ? <AlertCircle className="w-7 h-7" /> : isTruth ? <CheckCircle2 className="w-7 h-7" /> : <Shield className="w-7 h-7" />}
                         </div>
                         
                         <div>
@@ -190,9 +199,9 @@ export default function History() {
                           </h3>
                           <div className="flex items-center gap-3 mb-1">
                             <span className={`text-sm font-bold uppercase tracking-wider ${
-                              isTruth ? "text-emerald-400" : "text-red-400"
+                              isInsufficient || isMixed ? "text-amber-400" : isTruth ? "text-emerald-400" : "text-red-400"
                             }`}>
-                              {session.verdict} detected
+                              {isInsufficient ? "Incomplete Data" : isMixed ? "Mixed Indicators" : session.verdict} detected
                             </span>
                             <span className="w-1 h-1 rounded-full bg-zinc-700" />
                             <span className="text-zinc-400 text-sm font-medium">
@@ -284,59 +293,68 @@ export default function History() {
                         className="border-t border-white/5 bg-white/[0.02]"
                       >
                         <div className="p-8 space-y-10">
-                          {/* Facial Indicators */}
-                          <div>
-                            <div className="flex items-center gap-3 mb-6">
-                              <div className="w-1 h-5 bg-emerald-500 rounded-full" />
-                              <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400">Facial Indicators</h4>
+                          {/* Veracity & Timestamp Summary */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Veracity Distribution */}
+                            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+                              <div className="flex items-center gap-3 mb-6">
+                                <BarChart3 className="w-5 h-5 text-emerald-400" />
+                                <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400">Veracity Distribution</h4>
+                              </div>
+                              <div className="space-y-4">
+                                <div>
+                                  <div className="flex justify-between text-xs font-bold mb-2 text-zinc-300">
+                                    <span>Truthful</span>
+                                    <span className="text-emerald-400">{fullResults?.truthPercentage || 0}%</span>
+                                  </div>
+                                  <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+                                    <motion.div 
+                                      initial={{ width: 0 }}
+                                      animate={{ width: `${fullResults?.truthPercentage || 0}%` }}
+                                      className="h-full bg-emerald-500" 
+                                    />
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="flex justify-between text-xs font-bold mb-2 text-zinc-300">
+                                    <span>Deceptive</span>
+                                    <span className="text-red-400">{fullResults?.deceptionPercentage || 0}%</span>
+                                  </div>
+                                  <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+                                    <motion.div 
+                                      initial={{ width: 0 }}
+                                      animate={{ width: `${fullResults?.deceptionPercentage || 0}%` }}
+                                      className="h-full bg-red-500" 
+                                    />
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                              {fullResults?.facialFeatures?.map((f: any, i: number) => (
-                                <MetricGauge 
-                                  key={i}
-                                  label={f.feature} 
-                                  value={f.value} 
-                                  icon={
-                                    f.feature.includes("Blink") ? Eye :
-                                    f.feature.includes("Micro") ? Smile :
-                                    f.feature.includes("Eye") ? Eye :
-                                    f.feature.includes("Lip") ? User :
-                                    f.feature.includes("Brow") ? User :
-                                    f.feature.includes("Symmetry") ? Shield :
-                                    Shield
-                                  } 
-                                  color="bg-emerald-500" 
-                                  size="sm"
-                                />
-                              ))}
-                            </div>
-                          </div>
 
-                          {/* Vocal Indicators */}
-                          <div>
-                            <div className="flex items-center gap-3 mb-6">
-                              <div className="w-1 h-5 bg-blue-500 rounded-full" />
-                              <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400">Vocal Indicators</h4>
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                              {fullResults?.voiceFeatures?.filter((f: any) => f.feature !== "Voice Stress Index").map((f: any, i: number) => (
-                                <MetricGauge 
-                                  key={i}
-                                  label={f.feature} 
-                                  value={f.value} 
-                                  icon={
-                                    f.feature.includes("Pitch") ? Waves :
-                                    f.feature.includes("Rate") ? Timer :
-                                    f.feature.includes("Pause") ? Clock :
-                                    f.feature.includes("Tremor") ? Activity :
-                                    f.feature.includes("MFCC") ? BarChart3 :
-                                    f.feature.includes("Jitter") ? Activity :
-                                    Mic
-                                  } 
-                                  color="bg-blue-500" 
-                                  size="sm"
-                                />
-                              ))}
+                            {/* Timestamp Summary */}
+                            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+                              <div className="flex items-center gap-3 mb-6">
+                                <Timer className="w-5 h-5 text-blue-400" />
+                                <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400">Timestamp Report</h4>
+                              </div>
+                              <div className="grid grid-cols-1 gap-2">
+                                {fullResults?.segments?.slice(0, 6).map((s: any, i: number) => (
+                                  <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/5">
+                                    <div className="flex items-center gap-3">
+                                      <div className={`w-1.5 h-1.5 rounded-full ${s.verdict === 'truth' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                                      <span className="text-[10px] font-mono text-zinc-400">{s.startTime}s - {s.endTime}s</span>
+                                    </div>
+                                    <span className={`text-[10px] font-black uppercase tracking-wider ${s.verdict === 'truth' ? 'text-emerald-400' : 'text-red-400'}`}>
+                                      {s.verdict}
+                                    </span>
+                                  </div>
+                                ))}
+                                {(!fullResults?.segments || fullResults.segments.length === 0) && (
+                                  <div className="text-center py-4 text-zinc-500 text-xs italic">
+                                    No segment data available
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
 

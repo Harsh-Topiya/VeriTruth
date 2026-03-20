@@ -47,6 +47,11 @@ You must respond with ONLY a valid JSON object in this exact format:
     {"feature": string, "value": number, "details": "Detailed observation linking to the score"}
   ],
   "timelineData": [{time: string, facial: number, voice: number, combined: number}],
+  "segments": [
+    {"startTime": number, "endTime": number, "verdict": "truth" | "deception", "confidence": number}
+  ],
+  "truthPercentage": number,
+  "deceptionPercentage": number,
   "aiAnalysis": "A comprehensive forensic report (at least 250-300 words). 
   1. Executive Summary: State the verdict and confidence level.
   2. Facial Analysis: Detail specific micro-expressions, blink rate anomalies, and eye contact patterns.
@@ -120,35 +125,5 @@ export async function verifyFace(imageBase64: string) {
     return JSON.parse(response.text || "{\"faceDetected\": false}");
   } catch (e) {
     return { faceDetected: false, reason: "Failed to parse response" };
-  }
-}
-
-export async function analyzeFrame(imageBase64: string) {
-  const ai = new GoogleGenAI({ apiKey: (process.env.GEMINI_API_KEY as string) });
-  
-  const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: [
-      {
-        parts: [
-          { text: "You are a forensic lie detection expert. Analyze this video frame for subtle indicators of deception. Look for micro-expressions (fear, contempt, guilt), increased cognitive load, eye contact avoidance, or unnatural facial tension. Estimate the following metrics (0-100) where 100 is 'highly truthful/baseline' and 0 is 'highly deceptive/stressed': stress level (0=calm, 100=extreme stress), micro-expression intensity (0=none, 100=high intensity/leakage), and eye contact quality (0=avoidant, 100=natural). Respond with ONLY a JSON object: {\"stress\": number, \"micro\": number, \"eye\": number}" },
-          {
-            inlineData: {
-              mimeType: "image/jpeg",
-              data: imageBase64
-            }
-          }
-        ]
-      }
-    ],
-    config: {
-      responseMimeType: "application/json"
-    }
-  });
-
-  try {
-    return JSON.parse(response.text || "{\"stress\": 0, \"micro\": 0, \"eye\": 0}");
-  } catch (e) {
-    return { stress: 0, micro: 0, eye: 0 };
   }
 }

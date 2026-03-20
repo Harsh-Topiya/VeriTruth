@@ -9,11 +9,11 @@
   .markdown-body li { @apply mb-1; }
   .markdown-body strong { @apply text-white font-bold; }
 
-  .markdown-body-pdf h1 { @apply text-xl font-bold mt-4 mb-2 text-zinc-900; }
-  .markdown-body-pdf h2 { @apply text-lg font-bold mt-3 mb-2 text-zinc-800; }
-  .markdown-body-pdf h3 { @apply text-base font-bold mt-2 mb-1 text-zinc-700; }
-  .markdown-body-pdf p { @apply mb-2 text-sm; }
-  .markdown-body-pdf ul { @apply list-disc pl-4 mb-2 text-sm; }
-  .markdown-body-pdf li { @apply mb-0.5; }
-  .markdown-body-pdf strong { @apply font-bold text-zinc-900; }
+  .markdown-body-pdf h1 { font-weight: 700; font-size: 18pt; margin-top: 1rem; margin-bottom: 0.5rem; color: #18181b; }
+  .markdown-body-pdf h2 { font-weight: 700; font-size: 16pt; margin-top: 0.75rem; margin-bottom: 0.5rem; color: #27272a; }
+  .markdown-body-pdf h3 { font-weight: 700; font-size: 14pt; margin-top: 0.5rem; margin-bottom: 0.25rem; color: #3f3f46; }
+  .markdown-body-pdf p { margin-bottom: 0.5rem; font-size: 12pt; color: #27272a; }
+  .markdown-body-pdf ul { list-style-type: disc; padding-left: 1rem; margin-bottom: 0.5rem; font-size: 12pt; }
+  .markdown-body-pdf li { margin-bottom: 0.125rem; }
+  .markdown-body-pdf strong { font-weight: 700; color: #18181b; }
 }

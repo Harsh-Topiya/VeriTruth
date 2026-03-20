@@ -25,6 +25,14 @@ export interface AnalysisResults {
     voice: number;
     combined: number;
   }[];
+  segments?: {
+    startTime: number;
+    endTime: number;
+    verdict: "truth" | "deception";
+    confidence: number;
+  }[];
+  truthPercentage?: number;
+  deceptionPercentage?: number;
   recordingDuration: number;
   aiAnalysis?: string;
   title?: string;
