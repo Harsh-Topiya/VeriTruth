@@ -1,12 +1,24 @@
-import { Link } from "react-router-dom";
-import { Shield, Brain, Mic, Eye, ArrowRight, CheckCircle2, Zap, BarChart3 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Shield, Brain, Mic, Eye, ArrowRight, CheckCircle2, Zap, BarChart3, Info, HelpCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { Background } from "../components/Background";
 import Header from "../components/Header";
 import { useAnalysis } from "../context/AnalysisContext";
+import { useEffect } from "react";
 
 export default function Index() {
   const { analysisResults } = useAnalysis();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace("#", "");
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [location]);
 
   return (
     <div className="min-h-screen bg-[#020617] text-white font-sans selection:bg-emerald-500/30 overflow-x-hidden">
