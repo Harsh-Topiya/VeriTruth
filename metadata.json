@@ -1,5 +1,5 @@
 {
-  "name": "VeriTruth-AI Deception Analysis",
+  "name": "VeriTruth",
   "description": "Advanced multimodal deception analysis for uncovering truth using facial micro-expressions and voice stress detection.",
   "requestFramePermissions": ["camera", "microphone"]
 }

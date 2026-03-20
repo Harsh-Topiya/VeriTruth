@@ -5,7 +5,7 @@ export interface SessionData {
   userId: string;
   createdAt: string;
   timestamp: string;
-  verdict: "truth" | "deception";
+  verdict: "truth" | "deception" | "mixed_indicators";
   overallConfidence: number;
   recordingDuration: number;
   analysisResults: AnalysisResults;

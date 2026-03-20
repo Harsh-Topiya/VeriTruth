@@ -55,6 +55,7 @@ export default function Results() {
   const navigate = useNavigate();
   const { analysisResults, user } = useAnalysis();
   const [showPreview, setShowPreview] = useState(false);
+  const [showShareToast, setShowShareToast] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
 
   const handleExport = () => {
@@ -108,7 +109,8 @@ export default function Results() {
         console.error('Error sharing:', err);
       }
     } else {
-      alert("Your browser doesn't support direct sharing. You can copy the URL from the address bar to share your results manually.");
+      setShowShareToast(true);
+      setTimeout(() => setShowShareToast(false), 3000);
     }
   };
 
@@ -137,12 +139,13 @@ export default function Results() {
   }
 
   const isTruth = analysisResults.verdict === "truth";
-  const isInsufficient = analysisResults.verdict === "insufficient_data";
+  const isMixedIndicators = analysisResults.verdict === "mixed_indicators";
 
   // Check if it's a single verdict throughout
   const hasMultipleSegments = analysisResults.segments && analysisResults.segments.length > 1;
   const allSameVerdict = analysisResults.segments && analysisResults.segments.every(s => s.verdict === analysisResults.segments![0].verdict);
   const showSingleVerdict = !hasMultipleSegments || allSameVerdict;
+  const isMixed = isMixedIndicators || !showSingleVerdict;
 
   return (
     <div className="min-h-screen bg-[#020617] text-white font-sans selection:bg-emerald-500/30 flex flex-col relative">
@@ -188,7 +191,7 @@ export default function Results() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className={`col-span-2 p-6 rounded-3xl border flex items-center justify-between ${
-                isInsufficient
+                isMixed
                   ? "bg-amber-500/5 border-amber-500/20"
                   : isTruth 
                     ? "bg-emerald-500/5 border-emerald-500/20" 
@@ -201,20 +204,18 @@ export default function Results() {
                 </span>
                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-2 block">Final Verdict</span>
                 <h2 className={`text-4xl font-black tracking-tighter uppercase ${
-                  isInsufficient || !showSingleVerdict ? "text-amber-500" : isTruth ? "text-emerald-500" : "text-red-500"
+                  isMixed ? "text-amber-500" : isTruth ? "text-emerald-500" : "text-red-500"
                 }`}>
-                  {isInsufficient 
-                    ? "Incomplete Data" 
-                    : showSingleVerdict 
-                      ? analysisResults.verdict 
-                      : "Mixed Indicators"
+                  {isMixed 
+                    ? "Mixed Indicators" 
+                    : analysisResults.verdict === "truth" ? "Truth" : "Deception"
                   }
                 </h2>
               </div>
               <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-                isInsufficient || !showSingleVerdict ? "bg-amber-500/20" : isTruth ? "bg-emerald-500/20" : "bg-red-500/20"
+                isMixed ? "bg-amber-500/20" : isTruth ? "bg-emerald-500/20" : "bg-red-500/20"
               }`}>
-                {isInsufficient || !showSingleVerdict ? (
+                {isMixed ? (
                   <AlertTriangle className={`w-8 h-8 text-amber-500`} />
                 ) : isTruth ? (
                   <CheckCircle2 className="w-8 h-8 text-emerald-500" />
@@ -249,15 +250,15 @@ export default function Results() {
           </div>
 
           {/* Temporal Analysis & Percentages */}
-          {!isInsufficient && !showSingleVerdict && (
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="md:col-span-1 p-6 bg-slate-900/40 border border-white/5 rounded-3xl"
-              >
-                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-4 block">Veracity Distribution</span>
-                <div className="space-y-6">
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="md:col-span-1 p-6 bg-slate-900/40 border border-white/5 rounded-3xl"
+            >
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-4 block">Veracity Distribution</span>
+              <div className="space-y-6">
+                {(isMixed || isTruth) && (
                   <div>
                     <div className="flex justify-between mb-2">
                       <span className="text-xs font-bold text-emerald-500">Truthful</span>
@@ -271,6 +272,8 @@ export default function Results() {
                       />
                     </div>
                   </div>
+                )}
+                {(isMixed || !isTruth) && (
                   <div>
                     <div className="flex justify-between mb-2">
                       <span className="text-xs font-bold text-red-500">Deceptive</span>
@@ -284,40 +287,53 @@ export default function Results() {
                       />
                     </div>
                   </div>
-                </div>
-              </motion.div>
+                )}
+              </div>
+            </motion.div>
 
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="md:col-span-2 p-6 bg-slate-900/40 border border-white/5 rounded-3xl"
-              >
-                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-4 block">Timestamp Report</span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {analysisResults.segments?.map((segment, i) => (
-                    <div key={i} className="flex items-center gap-4 p-3 bg-white/5 border border-white/5 rounded-2xl">
-                      <div className={`w-2 h-10 rounded-full ${segment.verdict === 'truth' ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <Clock className="w-3 h-3 text-zinc-500" />
-                          <span className="text-xs font-mono text-zinc-300">{segment.startTime}s - {segment.endTime}s</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-xs font-bold uppercase tracking-tight ${segment.verdict === 'truth' ? 'text-emerald-500' : 'text-red-500'}`}>
-                            {segment.verdict === 'truth' ? 'Truthful' : 'Deceptive'}
-                          </span>
-                          <span className="text-[10px] text-zinc-500">({segment.confidence}% confidence)</span>
-                        </div>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="md:col-span-2 p-6 bg-slate-900/40 border border-white/5 rounded-3xl"
+            >
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-4 block">Timestamp Report</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {analysisResults.segments?.filter(segment => {
+                  if (isMixed) return true;
+                  if (isTruth) return segment.verdict === 'truth';
+                  return segment.verdict === 'deception';
+                }).map((segment, i) => (
+                  <div key={i} className="flex items-center gap-4 p-3 bg-white/5 border border-white/5 rounded-2xl">
+                    <div className={`w-2 h-10 rounded-full ${segment.verdict === 'truth' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Clock className="w-3 h-3 text-zinc-500" />
+                        <span className="text-xs font-mono text-zinc-300">{segment.startTime}s - {segment.endTime}s</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs font-bold uppercase tracking-tight ${segment.verdict === 'truth' ? 'text-emerald-500' : 'text-red-500'}`}>
+                          {segment.verdict === 'truth' ? 'Truthful' : 'Deceptive'}
+                        </span>
+                        <span className="text-[10px] text-zinc-500">({segment.confidence}% confidence)</span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-          )}
+                  </div>
+                ))}
+                {analysisResults.segments?.filter(segment => {
+                  if (isMixed) return true;
+                  if (isTruth) return segment.verdict === 'truth';
+                  return segment.verdict === 'deception';
+                }).length === 0 && (
+                  <div className="col-span-full flex items-center justify-center py-8 text-zinc-500 text-xs italic">
+                    No matching segments found for this verdict.
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
 
           {/* Core Modality Metrics */}
-          {!isInsufficient && (
+          {!isMixedIndicators && (
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -374,7 +390,7 @@ export default function Results() {
           )}
 
           {/* Charts Grid */}
-          {!isInsufficient && (
+          {!isMixedIndicators && (
             <div className="grid lg:grid-cols-1 gap-8 mb-8">
               {/* Timeline Chart */}
               <div className="p-6 bg-slate-900/40 border border-white/5 rounded-3xl">
@@ -421,17 +437,17 @@ export default function Results() {
             </div>
           )}
 
-          {isInsufficient && (
+          {isMixedIndicators && (
             <div className="p-12 bg-amber-500/5 border border-amber-500/20 rounded-3xl mb-8 flex flex-col items-center text-center">
               <div className="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mb-6">
                 <AlertTriangle className="w-10 h-10 text-amber-500" />
               </div>
-              <h3 className="text-2xl font-black uppercase tracking-tighter mb-4">Incomplete Analysis Data</h3>
+              <h3 className="text-2xl font-black uppercase tracking-tighter mb-4">Mixed Indicators Detected</h3>
               <p className="text-zinc-400 max-w-2xl text-lg leading-relaxed">
-                VeriTruth requires both <span className="text-emerald-400 font-bold">visual facial tracking</span> and <span className="text-blue-400 font-bold">voice stress analysis</span> to provide a reliable verdict. 
-                {analysisResults.missingFeature === 'voice' && " No audible speech was detected in this recording."}
-                {analysisResults.missingFeature === 'visual' && " No clear facial features were detected in this recording."}
-                {analysisResults.missingFeature === 'both' && " Neither facial features nor audible speech were detected."}
+                The analysis has identified conflicting or insufficient signals across different modalities. This often occurs when one or more key indicators are missing or ambiguous.
+                {analysisResults.missingFeature === 'voice' && " For instance, no audible speech was detected in this recording."}
+                {analysisResults.missingFeature === 'visual' && " For instance, no clear facial features were detected in this recording."}
+                {analysisResults.missingFeature === 'both' && " For instance, neither facial features nor audible speech were clearly detected."}
               </p>
               <div className="mt-8 flex gap-4">
                 <button 
@@ -445,7 +461,7 @@ export default function Results() {
           )}
 
           {/* Detailed Breakdown */}
-          {!isInsufficient && (
+          {!isMixedIndicators && (
             <>
               <div className="mb-12">
                 <div className="flex items-center justify-between mb-6">
@@ -611,12 +627,10 @@ export default function Results() {
                       <div className="flex-[2] p-5 rounded-xl" style={{ backgroundColor: "#fafafa", border: "1px solid #e4e4e7" }}>
                         <h2 className="text-[11px] font-bold uppercase tracking-widest mb-2 leading-normal" style={{ color: "#71717a" }}>Subject Assessment</h2>
                         <div className="flex items-center gap-4">
-                          <div className={`font-black uppercase ${analysisResults?.verdict === 'insufficient_data' ? 'text-xl' : 'text-[28px]'}`} style={{ color: analysisResults?.verdict === 'insufficient_data' || !showSingleVerdict ? '#d97706' : analysisResults?.verdict === 'truth' ? '#059669' : '#dc2626' }}>
-                            {analysisResults?.verdict === 'insufficient_data' 
-                              ? 'Insufficient Data' 
-                              : showSingleVerdict 
-                                ? analysisResults?.verdict 
-                                : 'Mixed Indicators'}
+                          <div className={`font-black uppercase ${isMixed ? 'text-xl' : 'text-[28px]'}`} style={{ color: isMixed ? '#d97706' : analysisResults?.verdict === 'truth' ? '#059669' : '#dc2626' }}>
+                            {isMixed 
+                              ? 'Mixed Indicators' 
+                              : analysisResults?.verdict}
                           </div>
                           <div className="h-8 w-px" style={{ backgroundColor: "#e4e4e7" }} />
                           <div className="flex flex-col gap-1">
@@ -639,40 +653,57 @@ export default function Results() {
                       </div>
                     </div>
 
-                    {!showSingleVerdict && (
-                      <div className="grid grid-cols-2 gap-6 mb-6">
-                        <div className="p-5 rounded-xl" style={{ backgroundColor: "#fafafa", border: "1px solid #e4e4e7" }}>
-                          <h2 className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: "#71717a" }}>Veracity Distribution</h2>
-                          <div className="space-y-3">
-                            <div className="flex justify-between text-[10px] font-bold" style={{ color: "#18181b" }}>
-                              <span>Truthful</span>
-                              <span>{analysisResults.truthPercentage}%</span>
-                            </div>
-                            <div className="h-1.5 rounded-full" style={{ backgroundColor: "#f4f4f5" }}>
-                              <div className="h-full" style={{ width: `${analysisResults.truthPercentage}%`, backgroundColor: "#059669" }} />
-                            </div>
-                            <div className="flex justify-between text-[10px] font-bold" style={{ color: "#18181b" }}>
-                              <span>Deceptive</span>
-                              <span>{analysisResults.deceptionPercentage}%</span>
-                            </div>
-                            <div className="h-1.5 rounded-full" style={{ backgroundColor: "#f4f4f5" }}>
-                              <div className="h-full" style={{ width: `${analysisResults.deceptionPercentage}%`, backgroundColor: "#dc2626" }} />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-5 rounded-xl" style={{ backgroundColor: "#fafafa", border: "1px solid #e4e4e7" }}>
-                          <h2 className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: "#71717a" }}>Timestamp Summary</h2>
-                          <div className="space-y-1.5">
-                            {analysisResults.segments?.slice(0, 4).map((s, i) => (
-                              <div key={i} className="flex justify-between text-[9px]" style={{ color: "#3f3f46" }}>
-                                <span className="font-mono">{s.startTime}s-{s.endTime}s:</span>
-                                <span className="font-bold uppercase" style={{ color: s.verdict === 'truth' ? '#059669' : '#dc2626' }}>{s.verdict}</span>
+                    <div className="grid grid-cols-2 gap-6 mb-6">
+                      <div className="p-5 rounded-xl" style={{ backgroundColor: "#fafafa", border: "1px solid #e4e4e7" }}>
+                        <h2 className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: "#71717a" }}>Veracity Distribution</h2>
+                        <div className="space-y-3">
+                          {(isMixed || isTruth) && (
+                            <>
+                              <div className="flex justify-between text-[10px] font-bold" style={{ color: "#18181b" }}>
+                                <span>Truthful</span>
+                                <span>{analysisResults.truthPercentage}%</span>
                               </div>
-                            ))}
-                          </div>
+                              <div className="h-1.5 rounded-full" style={{ backgroundColor: "#f4f4f5" }}>
+                                <div className="h-full" style={{ width: `${analysisResults.truthPercentage}%`, backgroundColor: "#059669" }} />
+                              </div>
+                            </>
+                          )}
+                          {(isMixed || !isTruth) && (
+                            <>
+                              <div className="flex justify-between text-[10px] font-bold" style={{ color: "#18181b" }}>
+                                <span>Deceptive</span>
+                                <span>{analysisResults.deceptionPercentage}%</span>
+                              </div>
+                              <div className="h-1.5 rounded-full" style={{ backgroundColor: "#f4f4f5" }}>
+                                <div className="h-full" style={{ width: `${analysisResults.deceptionPercentage}%`, backgroundColor: "#dc2626" }} />
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
-                    )}
+                      <div className="p-5 rounded-xl" style={{ backgroundColor: "#fafafa", border: "1px solid #e4e4e7" }}>
+                        <h2 className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: "#71717a" }}>Timestamp Summary</h2>
+                        <div className="space-y-1.5">
+                          {analysisResults.segments?.filter(s => {
+                            if (isMixed) return true;
+                            if (isTruth) return s.verdict === 'truth';
+                            return s.verdict === 'deception';
+                          }).slice(0, 4).map((s, i) => (
+                            <div key={i} className="flex justify-between text-[9px]" style={{ color: "#3f3f46" }}>
+                              <span className="font-mono">{s.startTime}s-{s.endTime}s:</span>
+                              <span className="font-bold uppercase" style={{ color: s.verdict === 'truth' ? '#059669' : '#dc2626' }}>{s.verdict}</span>
+                            </div>
+                          ))}
+                          {analysisResults.segments?.filter(s => {
+                            if (isMixed) return true;
+                            if (isTruth) return s.verdict === 'truth';
+                            return s.verdict === 'deception';
+                          }).length === 0 && (
+                            <div className="text-[9px] italic" style={{ color: "#71717a" }}>No matching segments.</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
 
                     <div className="mb-6">
                       <h2 className="text-[11px] font-bold uppercase tracking-widest pb-1 mb-3 leading-normal" style={{ color: "#18181b", borderBottom: "1px solid #e4e4e7" }}>Core Deception Metrics</h2>
@@ -760,6 +791,18 @@ export default function Results() {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showShareToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 text-xs font-medium text-zinc-300 shadow-2xl"
+          >
+            Browser doesn't support direct sharing. Copy URL manually.
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

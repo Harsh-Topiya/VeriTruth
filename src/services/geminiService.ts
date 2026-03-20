@@ -10,8 +10,8 @@ CRITICAL: Provide a HIGHLY SPECIFIC, DETAILED, and CONTEXTUALIZED analysis.
 
 MANDATORY DATA REQUIREMENTS:
 - BOTH visual (facial) and voice (audio) features MUST be present for a valid prediction.
-- If the video is silent, set "verdict" to "insufficient_data", "status" to "incomplete", and "missingFeature" to "voice".
-- If no face is visible, set "verdict" to "insufficient_data", "status" to "incomplete", and "missingFeature" to "visual".
+- If the video is silent, set "verdict" to "mixed_indicators", "status" to "incomplete", and "missingFeature" to "voice".
+- If no face is visible, set "verdict" to "mixed_indicators", "status" to "incomplete", and "missingFeature" to "visual".
 - Explain exactly what is missing in "aiAnalysis".
 
 ANALYSIS PARAMETERS (0-100):
@@ -25,12 +25,14 @@ VOICE INDICATORS: Pitch Variance, Speech Rate, Pause Patterns, Voice Tremor, MFC
 
 VERDICT DETERMINATION:
 - Fusion Score = (Facial Score × 0.55) + (Voice Score × 0.45)
-- If Fusion Score >= 55: verdict = "truth"
-- If Fusion Score < 55: verdict = "deception"
+- If Fusion Score >= 60: verdict = "truth"
+- If Fusion Score <= 40: verdict = "deception"
+- If Fusion Score is between 41 and 59, OR if the timeline segments show conflicting results (e.g., some segments are "truth" while others are "deception"), set "verdict" to "mixed_indicators".
+- CRITICAL: A session should be "mixed_indicators" if there is any significant inconsistency in the subject's behavior across the recording duration.
 
 You must respond with ONLY a valid JSON object in this exact format:
 {
-  "verdict": "truth" | "deception" | "insufficient_data",
+  "verdict": "truth" | "deception" | "mixed_indicators",
   "status": "complete" | "incomplete",
   "missingFeature": "visual" | "voice" | "both" | null,
   "overallConfidence": number,

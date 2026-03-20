@@ -39,7 +39,7 @@ export default function Header({ extraButtons }: HeaderProps) {
                 <span className="text-white">Veri</span>
                 <span className="text-emerald-400">Truth</span>
               </div>
-              <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-zinc-500">AI DECEPTION ANALYSIS</span>
+              <span className="text-[7px] font-bold uppercase tracking-[0.25em] text-zinc-500">AI DECEPTION ANALYSIS</span>
             </div>
           </Link>
 

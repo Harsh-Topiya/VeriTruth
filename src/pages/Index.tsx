@@ -36,13 +36,13 @@ export default function Index() {
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest mb-8">
-                <Zap className="w-3 h-3" /> Next-Gen Deception Intelligence
+                <Zap className="w-3 h-3" /> next-gen lie detection system
               </div>
               <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/40">
                 Uncover Truth with <span className="text-emerald-500">Multimodal AI</span>
               </h1>
               <p className="text-lg md:text-xl text-zinc-400 leading-relaxed mb-12 max-w-2xl mx-auto">
-                VeriTruth combines advanced facial micro-expression analysis and voice stress detection to provide probabilistic assessments of deceptive behavior.
+                Our system combines advanced facial micro-expression analysis and voice stress detection to provide probabilistic assessments of deceptive behavior.
               </p>
               <div className="flex flex-wrap justify-center gap-6">
                 <Link 

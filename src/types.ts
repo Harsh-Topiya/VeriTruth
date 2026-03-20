@@ -1,5 +1,5 @@
 export interface AnalysisResults {
-  verdict: "truth" | "deception" | "insufficient_data";
+  verdict: "truth" | "deception" | "mixed_indicators";
   status?: "complete" | "incomplete";
   missingFeature?: "visual" | "voice" | "both";
   overallConfidence: number;
