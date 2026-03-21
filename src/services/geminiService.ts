@@ -60,19 +60,30 @@ You must respond with ONLY a valid JSON object in this exact format:
   3. Vocal Analysis: Discuss pitch variance, tremors, and pause patterns.
   4. Multimodal Synthesis: Explain how the visual and auditory cues either reinforce or contradict each other. 
   5. Conclusion: Summarize the deception cluster that led to the final determination."
-}`;
+}
+
+SCORING RIGOR:
+- Be DECISIVE. If the subject is lying, the deceptionPercentage should reflect the strength of the evidence. 
+- For clear deception (multiple indicators), the deceptionPercentage MUST be in the 90-100% range.
+- Do not cluster scores in the middle (40-60) unless the evidence is truly ambiguous.
+- Fusion Score is a 'Truth Score'. 0 = Absolute Deception, 100 = Absolute Truth.
+- deceptionPercentage = 100 - Fusion Score (if verdict is deception).
+- truthPercentage = Fusion Score (if verdict is truth).`;
 
 export async function analyzeVideo(videoBase64: string, duration: number, mimeType: string = "video/webm") {
   // Initialize Gemini API on the frontend
   const ai = new GoogleGenAI({ apiKey: (process.env.GEMINI_API_KEY as string) });
   
-  const userPrompt = `Analyze this video recording for signs of truthfulness or deception. The recording is ${duration} seconds long.
-
-Based on the visible facial expressions, body language, and any audible voice patterns, provide a comprehensive lie detection analysis with specific scores for each parameter.
-
-Generate timeline segments every 5 seconds up to the recording duration.
-
-Remember: ONLY return the JSON object, no other text.`;
+  const userPrompt = `Perform a high-fidelity forensic audit on this video recording (${duration}s). 
+  
+  Analyze the interplay between facial micro-expressions (FACS) and vocal stress patterns. 
+  Look for 'Deception Clusters'—where multiple subtle cues (e.g., eye-shunning, pitch breaks, lip compression) occur simultaneously.
+  
+  If the subject is deceptive, be bold and accurate in your scoring. We require at least 95% accuracy in detecting clear lies.
+  
+  Generate timeline segments every 5 seconds.
+  
+  Remember: ONLY return the JSON object, no other text.`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
