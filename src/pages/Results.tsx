@@ -333,197 +333,166 @@ export default function Results() {
           </div>
 
           {/* Core Modality Metrics */}
-          {!isMixedIndicators && (
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3 }}
-                className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-3xl flex items-center justify-between group relative cursor-help"
-                title={`Facial Confidence: ${analysisResults.facialConfidence}%`}
-              >
-                <div className="flex-1">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500/60 mb-2 block">Facial Confidence</span>
-                  <div className="flex items-center gap-4">
-                    <h2 className="text-4xl font-black tracking-tighter text-emerald-400">{analysisResults.facialConfidence}%</h2>
-                    <div className="flex-1 h-1.5 bg-emerald-500/10 rounded-full overflow-hidden max-w-[100px]">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${analysisResults.facialConfidence}%` }}
-                        transition={{ duration: 1, delay: 0.5 }}
-                        className="h-full bg-emerald-500"
-                      />
-                    </div>
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3 }}
+              className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-3xl flex items-center justify-between group relative cursor-help"
+              title={`Facial Confidence: ${analysisResults.facialConfidence}%`}
+            >
+              <div className="flex-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500/60 mb-2 block">Facial Confidence</span>
+                <div className="flex items-center gap-4">
+                  <h2 className="text-4xl font-black tracking-tighter text-emerald-400">{analysisResults.facialConfidence}%</h2>
+                  <div className="flex-1 h-1.5 bg-emerald-500/10 rounded-full overflow-hidden max-w-[100px]">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${analysisResults.facialConfidence}%` }}
+                      transition={{ duration: 1, delay: 0.5 }}
+                      className="h-full bg-emerald-500"
+                    />
                   </div>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-                  <Smile className="w-6 h-6 text-emerald-400" />
-                </div>
-              </motion.div>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                <Smile className="w-6 h-6 text-emerald-400" />
+              </div>
+            </motion.div>
 
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4 }}
-                className="p-6 bg-blue-500/5 border border-blue-500/20 rounded-3xl flex items-center justify-between group relative cursor-help"
-                title={`Speech Clarity: ${analysisResults.speechClarity}%`}
-              >
-                <div className="flex-1">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500/60 mb-2 block">Speech Clarity</span>
-                  <div className="flex items-center gap-4">
-                    <h2 className="text-4xl font-black tracking-tighter text-blue-400">{analysisResults.speechClarity}%</h2>
-                    <div className="flex-1 h-1.5 bg-blue-500/10 rounded-full overflow-hidden max-w-[100px]">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${analysisResults.speechClarity}%` }}
-                        transition={{ duration: 1, delay: 0.6 }}
-                        className="h-full bg-blue-500"
-                      />
-                    </div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4 }}
+              className="p-6 bg-blue-500/5 border border-blue-500/20 rounded-3xl flex items-center justify-between group relative cursor-help"
+              title={`Speech Clarity: ${analysisResults.speechClarity}%`}
+            >
+              <div className="flex-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500/60 mb-2 block">Speech Clarity</span>
+                <div className="flex items-center gap-4">
+                  <h2 className="text-4xl font-black tracking-tighter text-blue-400">{analysisResults.speechClarity}%</h2>
+                  <div className="flex-1 h-1.5 bg-blue-500/10 rounded-full overflow-hidden max-w-[100px]">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${analysisResults.speechClarity}%` }}
+                      transition={{ duration: 1, delay: 0.6 }}
+                      className="h-full bg-blue-500"
+                    />
                   </div>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center">
-                  <Mic className="w-6 h-6 text-blue-400" />
-                </div>
-              </motion.div>
-            </div>
-          )}
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                <Mic className="w-6 h-6 text-blue-400" />
+              </div>
+            </motion.div>
+          </div>
 
           {/* Charts Grid */}
-          {!isMixedIndicators && (
-            <div className="grid lg:grid-cols-1 gap-8 mb-8">
-              {/* Timeline Chart */}
-              <div className="p-6 bg-slate-900/40 border border-white/5 rounded-3xl">
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-base font-bold flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-blue-500" />
-                    Confidence Over Time
-                  </h3>
-                  <div className="flex gap-4 text-[10px] font-bold uppercase tracking-widest">
-                    <span className="flex items-center gap-1.5 text-emerald-500">
-                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> Facial
-                    </span>
-                    <span className="flex items-center gap-1.5 text-blue-500">
-                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" /> Voice
-                    </span>
-                  </div>
-                </div>
-                <div className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={analysisResults.timelineData}>
-                      <defs>
-                        <linearGradient id="colorFacial" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                        </linearGradient>
-                        <linearGradient id="colorVoice" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                      <XAxis dataKey="time" stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px' }}
-                        itemStyle={{ fontSize: '10px', fontWeight: 'bold' }}
-                      />
-                      <Area type="monotone" dataKey="facial" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorFacial)" />
-                      <Area type="monotone" dataKey="voice" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorVoice)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
+          <div className="grid lg:grid-cols-1 gap-8 mb-8">
+            {/* Timeline Chart */}
+            <div className="p-6 bg-slate-900/40 border border-white/5 rounded-3xl">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-base font-bold flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-blue-500" />
+                  Confidence Over Time
+                </h3>
+                <div className="flex gap-4 text-[10px] font-bold uppercase tracking-widest">
+                  <span className="flex items-center gap-1.5 text-emerald-500">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> Facial
+                  </span>
+                  <span className="flex items-center gap-1.5 text-blue-500">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" /> Voice
+                  </span>
                 </div>
               </div>
-            </div>
-          )}
-
-          {isMixedIndicators && (
-            <div className="p-12 bg-amber-500/5 border border-amber-500/20 rounded-3xl mb-8 flex flex-col items-center text-center">
-              <div className="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mb-6">
-                <AlertTriangle className="w-10 h-10 text-amber-500" />
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={analysisResults.timelineData}>
+                    <defs>
+                      <linearGradient id="colorFacial" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorVoice" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                    <XAxis dataKey="time" stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px' }}
+                      itemStyle={{ fontSize: '10px', fontWeight: 'bold' }}
+                    />
+                    <Area type="monotone" dataKey="facial" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorFacial)" />
+                    <Area type="monotone" dataKey="voice" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorVoice)" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
-              <h3 className="text-2xl font-black uppercase tracking-tighter mb-4">Mixed Indicators Detected</h3>
-              <p className="text-zinc-400 max-w-2xl text-lg leading-relaxed">
-                The analysis has identified conflicting or insufficient signals across different modalities. This often occurs when one or more key indicators are missing or ambiguous.
-                {analysisResults.missingFeature === 'voice' && " For instance, no audible speech was detected in this recording."}
-                {analysisResults.missingFeature === 'visual' && " For instance, no clear facial features were detected in this recording."}
-                {analysisResults.missingFeature === 'both' && " For instance, neither facial features nor audible speech were clearly detected."}
-              </p>
-              <div className="mt-8 flex gap-4">
-                <button 
-                  onClick={() => navigate("/analyze")}
-                  className="px-8 py-3 bg-amber-500 text-black rounded-full font-bold hover:bg-amber-400 transition-all"
-                >
-                  Try Again
-                </button>
-              </div>
             </div>
-          )}
+          </div>
 
           {/* Detailed Breakdown */}
-          {!isMixedIndicators && (
-            <>
-              <div className="mb-12">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-1 h-6 bg-emerald-500 rounded-full" />
-                    <h3 className="text-lg font-black uppercase tracking-tighter">Facial Indicators</h3>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                  {analysisResults.facialFeatures.filter(f => f.feature !== "Facial Confidence" && f.feature !== "Eye Contact").map((f, i) => (
-                    <MetricGauge 
-                      key={i}
-                      label={f.feature} 
-                      value={f.value} 
-                      details={f.details}
-                      icon={
-                        f.feature.includes("Blink") ? Eye :
-                        f.feature.includes("Micro") ? Smile :
-                        f.feature.includes("Eye") ? Eye :
-                        f.feature.includes("Lip") ? User :
-                        f.feature.includes("Brow") ? User :
-                        f.feature.includes("Symmetry") ? Shield :
-                        Shield
-                      } 
-                      color="bg-emerald-500" 
-                      size="sm"
-                    />
-                  ))}
-                </div>
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-6 bg-emerald-500 rounded-full" />
+                <h3 className="text-lg font-black uppercase tracking-tighter">Facial Indicators</h3>
               </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+              {analysisResults.facialFeatures.filter(f => f.feature !== "Facial Confidence" && f.feature !== "Eye Contact").map((f, i) => (
+                <MetricGauge 
+                  key={i}
+                  label={f.feature} 
+                  value={f.value} 
+                  details={f.details}
+                  icon={
+                    f.feature.includes("Blink") ? Eye :
+                    f.feature.includes("Micro") ? Smile :
+                    f.feature.includes("Eye") ? Eye :
+                    f.feature.includes("Lip") ? User :
+                    f.feature.includes("Brow") ? User :
+                    f.feature.includes("Symmetry") ? Shield :
+                    Shield
+                  } 
+                  color="bg-emerald-500" 
+                  size="sm"
+                />
+              ))}
+            </div>
+          </div>
 
-              <div className="mb-12">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-1 h-6 bg-blue-500 rounded-full" />
-                    <h3 className="text-lg font-black uppercase tracking-tighter">Vocal Indicators</h3>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                  {analysisResults.voiceFeatures.filter(f => f.feature !== "Speech Clarity" && f.feature !== "Voice Stress Index").map((f, i) => (
-                    <MetricGauge 
-                      key={i}
-                      label={f.feature} 
-                      value={f.value} 
-                      details={f.details}
-                      icon={
-                        f.feature.includes("Pitch") ? Waves :
-                        f.feature.includes("Rate") ? Timer :
-                        f.feature.includes("Pause") ? Clock :
-                        f.feature.includes("Tremor") ? Activity :
-                        f.feature.includes("MFCC") ? BarChart3 :
-                        f.feature.includes("Jitter") ? Activity :
-                        Mic
-                      } 
-                      color="bg-blue-500" 
-                      size="sm"
-                    />
-                  ))}
-                </div>
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-6 bg-blue-500 rounded-full" />
+                <h3 className="text-lg font-black uppercase tracking-tighter">Vocal Indicators</h3>
               </div>
-            </>
-          )}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+              {analysisResults.voiceFeatures.filter(f => f.feature !== "Speech Clarity" && f.feature !== "Voice Stress Index").map((f, i) => (
+                <MetricGauge 
+                  key={i}
+                  label={f.feature} 
+                  value={f.value} 
+                  details={f.details}
+                  icon={
+                    f.feature.includes("Pitch") ? Waves :
+                    f.feature.includes("Rate") ? Timer :
+                    f.feature.includes("Pause") ? Clock :
+                    f.feature.includes("Tremor") ? Activity :
+                    f.feature.includes("MFCC") ? BarChart3 :
+                    f.feature.includes("Jitter") ? Activity :
+                    Mic
+                  } 
+                  color="bg-blue-500" 
+                  size="sm"
+                />
+              ))}
+            </div>
+          </div>
 
           <div className="grid lg:grid-cols-1 gap-8">
             {/* AI Summary */}
