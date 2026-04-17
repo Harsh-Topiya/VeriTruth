@@ -64,15 +64,20 @@ You must respond with ONLY a valid JSON object in this exact format:
 
 SCORING RIGOR:
 - Be DECISIVE. If the subject is lying, the deceptionPercentage should reflect the strength of the evidence. 
-- For clear deception (multiple indicators), the deceptionPercentage MUST be in the 90-100% range.
+- For clear deception (multiple indicators), the deceptionPercentage MUST be in the 95-100% range.
 - Do not cluster scores in the middle (40-60) unless the evidence is truly ambiguous.
 - Fusion Score is a 'Truth Score'. 0 = Absolute Deception, 100 = Absolute Truth.
 - deceptionPercentage = 100 - Fusion Score (if verdict is deception).
 - truthPercentage = Fusion Score (if verdict is truth).`;
 
 export async function analyzeVideo(videoBase64: string, duration: number, mimeType: string = "video/webm") {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is missing. Please set it in your .env file for local development.");
+  }
+
   // Initialize Gemini API on the frontend
-  const ai = new GoogleGenAI({ apiKey: (process.env.GEMINI_API_KEY as string) });
+  const ai = new GoogleGenAI({ apiKey });
   
   const userPrompt = `Perform a high-fidelity forensic audit on this video recording (${duration}s). 
   
@@ -112,7 +117,12 @@ export async function analyzeVideo(videoBase64: string, duration: number, mimeTy
 }
 
 export async function verifyFace(imageBase64: string) {
-  const ai = new GoogleGenAI({ apiKey: (process.env.GEMINI_API_KEY as string) });
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is missing. Please set it in your .env file for local development.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
   
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",

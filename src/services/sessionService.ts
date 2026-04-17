@@ -83,3 +83,10 @@ export const deleteSession = async (sessionId: string) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
   notifyUpdate();
 };
+
+export const deleteSessions = async (sessionIds: string[]) => {
+  const sessions = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  const filtered = sessions.filter((s: any) => !sessionIds.includes(s.id));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+  notifyUpdate();
+};

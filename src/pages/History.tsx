@@ -8,7 +8,7 @@ import { useAnalysis } from "../context/AnalysisContext";
 import { Background } from "../components/Background";
 import { MetricGauge } from "../components/MetricGauge";
 import Header from "../components/Header";
-import { subscribeToUserSessions, deleteSession } from "../services/sessionService";
+import { subscribeToUserSessions, deleteSession, deleteSessions } from "../services/sessionService";
 
 interface Session {
   id: string;
@@ -79,9 +79,7 @@ export default function History() {
   const bulkDeleteMutation = useMutation({
     mutationFn: async (ids: string[]) => {
       setIsBulkDeleting(true);
-      for (const id of ids) {
-        await deleteSession(id);
-      }
+      await deleteSessions(ids);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sessions", user?.uid] });

@@ -174,9 +174,9 @@ export default function Analyze() {
           setIsCalibrating(false);
           return;
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Face verification error:", err);
-        setCalibrationError("Something went wrong during face verification. Please check your connection and try again.");
+        setCalibrationError(err.message || "Something went wrong during face verification. Please check your connection and try again.");
         setIsCalibrating(false);
         return;
       }
